@@ -78,14 +78,14 @@ Draw a heatmap of a long pattern in list format: [name of the pattern,[[36,38],[
 **makestyle(lista, length, folder,stylename)**
 This function analyzes a collection of patterns to extract style knowledge from it. This "style knowledge" used for generative purposes in the generative drum sequencer called Dr.Drums, also developed as part of this thesis. The collection of patterns used as input can be in a .txt file or as .mid files. The output is a bunch of .txt files appropriate for Dr.Drums to use.
 
-*rs_gen(listofpatterns)*
+**rs_gen(listofpatterns)**
 Use this function to generate a rhythm space given a set of patterns. The methodology is described in the CMMR 2017 paper (http://bit.ly/2IutMbF). For each pattern extract the useful descriptors (found experimentally as described in the paper) as a vector, normalize each column of descriptors, measure Euclidean distance, create a symmetric matrix, compute MDS, get the 2D coordinates of each pattern.
 
 
-*rs_plot(names,coords,title)*
+**rs_plot(names,coords,title)**
 This function receives a list of names and a list of 2D coords and plots each point in space with its name.
 
-*midifolder2list(foldername)*
+**midifolder2list(foldername)**
 This function converts all midi files in a folder into lists. The idea is that this list is fed to the makestyle function. This function looks for a local folder named /midi and then for a subfolder which is called from the function.
 
 
