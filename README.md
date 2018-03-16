@@ -1,4 +1,4 @@
-
+# Rhythm Toolbox
 This toolbox is produced in the context of my PhD research on drum rhythm analysis and generation, where I found the need to process, model and test different aspects of drum rhythm datasets. Perhaps one of the main contributions of this toolbox is the possibility to compute descriptors for symbolic drum patterns, which are the result of a theoretical and experimental approach to drum rhythm study based on polyphonic rhythm perception and cognition studies (see section 3.4 of my thesis https://drive.google.com/open?id=1Z5Wn5VkWI3Tov16frWZYOt6sr8p_ASIs).
 
 
