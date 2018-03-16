@@ -6,6 +6,8 @@ from sklearn import manifold
 import matplotlib.pyplot as plt
 import pylab
 from collections import Counter
+import mido as mido
+import os
 
 def compute(pattern):
 # Compute a set of rhythmic descrptors for one polyphonic pattern
@@ -357,9 +359,9 @@ descriptorList16=['noi', 'loD', 'midD', 'hiD', 'stepD', 'lowness', 'midness', 'h
 GM_dict={
 	35:['Acoustic Bass Drum','low',36, 'K', 1],
 	36:['Bass Drum 1','low',36, 'K', 1],
-	37:['Side Stick','mid',37, 'RS', 5],
+	37:['Side Stick','mid',37, 'RS', 6],
 	38:['Acoustic Snare','mid',38, 'SN', 2],
-	39:['Hand Clap','mid',39, 'CP', 6],
+	39:['Hand Clap','mid',39, 'CP', 5],
 	40:['Electric Snare','mid',38, 'SN', 2],
 	41:['Low Floor Tom','low',45, 'LT', 7],
 	42:['Closed Hi Hat','high',42, 'CH', 3],
@@ -423,7 +425,7 @@ combo2l8={
 	 '[1, 2, 4]': 'l',
 	 '[3, 4]': 'm',
 	 '[1, 3, 4]': 'n',
-	 '[2, 3, 4]': '0',
+	 '[2, 3, 4]': 'o',
 	 '[1, 2, 3, 4]': 'p'
 	}
 
@@ -555,11 +557,11 @@ def icc(mat, icc_type='icc2'):
     return ICC
 
 def correlationRank(mat):
-	#compute the correlation rank according to this article
-	#https://en.wikipedia.org/wiki/Inter-rater_reliability#Correlation_coefficients
-	#it is based on spearman rank correlation
-	#the general idea is to compute the agreement (Spearman) between each possible pair of raters
-	#and then take a mean from that. 
+#compute the correlation rank according to this article
+#https://en.wikipedia.org/wiki/Inter-rater_reliability#Correlation_coefficients
+#it is based on spearman rank correlation
+#the general idea is to compute the agreement (Spearman) between each possible pair of raters
+#and then take a mean from that. 
 
 	#we assume that questions are rows and raters are columns
 	#and that mat is a nupi array
@@ -580,9 +582,9 @@ def correlationRank(mat):
 	return raters_correlations
 
 def stress(m1,m2):
-	#compute the stress between two matrices of equal dimension
-	#if they have different dimensions i.e. != number of columns
-	#then fill extra columns with zeroes
+#compute the stress between two matrices of equal dimension
+#if they have different dimensions i.e. != number of columns
+#then fill extra columns with zeroes
 	m1=np.matrix((m1))
 	m2=np.matrix((m2))
 	if np.shape(m1)==np.shape(m2):
@@ -1021,12 +1023,12 @@ def makestyle(lista, length, folder,stylename):
 			s2eight=[]
 			for m in s:
 				if m != 0:
-					s2eight.append(GM2eight(m))
+					s2eight.append(GM2eight(m)) #Remap all MIDI notes to only 8 instruments (-1 if instrument not mapable)
 				else:
-					s2eight.append(0)
+					s2eight.append(0) #if the step is empty append a 0
 			lowpack=[]
 			hipack=[]
-			for n in s2eight:
+			for n in s2eight: # divide the event in the step into 2 lists of 4 numbers (lowpack and hipack)
 				if n != -1:
 					if n < 5:
 						lowpack.append(n)
@@ -1042,7 +1044,7 @@ def makestyle(lista, length, folder,stylename):
 			lowpack=sorted(lowpack)
 			#print str(lowpack), str(hipack)
 			#print step, rtb.combo2l8[str(lowpack)]+rtb.combo2l8[str(hipack)]
-			allsteps2l.append(combo2l8[str(lowpack)]+combo2l8[str(hipack)])
+			allsteps2l.append(combo2l8[str(lowpack)]+combo2l8[str(hipack)]) # here we have a list of steps with max 8 instruments
 	
 	
 
@@ -1132,6 +1134,56 @@ def rs_plot(names,coords,title):
 	plt.show()
 
 	return
+
+def midifolder2list(foldername):
+# this function converts all midi files in a folder into lists
+# the idea is that this list is fed to the makestyle function.
+# this function looks for a local folder named /midi and then 
+# for a subfolder which is called from the function
+	allpatterns=[]
+	allfiles=os.listdir("midi/"+foldername)
+	for filename in allfiles: # store in filename the name of each of the files
+		#print filename 
+
+
+		mid=mido.MidiFile("midi/"+foldername+"/"+filename)
+
+		#time: inside a track, it is delta time in ticks. A delta time is how long to wait before the next message. This must be an integer
+
+		acc=0
+		for i, track in enumerate(mid.tracks):
+			grid={}
+		    #print('Track {}: {}'.format(i, track.name))
+			for msg in track:
+				useful=str(msg)
+				#print useful[0]
+				if useful[0]!='<':
+					
+					note=int(useful.split()[2][5:7])
+					acc=msg.time+acc
+					if msg.type is 'note_on':
+						temp=[]
+						if acc/24 in grid:
+
+							temp=grid[acc/24]
+							temp.append(note)
+							grid[acc/24]=temp
+						else:
+							temp.append(note)
+							#print type(note),temp, note
+							grid[acc/24]=temp
+		#print grid
+		steps=list(grid.keys())
+		totalsteps= ((max(steps)/16)+1)*16 #find the rounded length in steps of 1/16th notes
+		for x in range(totalsteps):
+			if grid.get(x) == None:
+				grid[x]=[0]
+		#	print x,grid.get(x)
+		onsets=list(grid.values())
+		#print foldername+'_'+filename,onsets
+		onsets.insert(0,foldername+'_'+filename)
+		allpatterns.append(onsets)
+	return allpatterns
 
 
 
