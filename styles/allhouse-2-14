@@ -1,0 +1,15 @@
+order, 2;
+step, 14;
+bbaa, ia 0.5 ma 0.25 ea 0.25 me 0.25;
+dbaa, ia 0.5 ic 0.5;
+dbea, ia 1.0;
+hama, ea 1.0;
+hbma, ea 1.0;
+faaa, me 1.0;
+lbka, ja 1.0;
+haea, ia 1.0;
+ebaa, ia 1.0;
+baaa, aa 1.0;
+fbea, ia 1.5 ie 0.5;
+hbea, ia 1.0;
+bbea, me 1.0;

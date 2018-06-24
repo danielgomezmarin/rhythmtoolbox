@@ -1,0 +1,5 @@
+order, 1;
+step, 2;
+aa, ai 0.4 eo 0.2 eg 0.2 ec 0.2 ek 0.2;
+ai, aa 0.5 ab 0.5;
+ea, eg 0.5 ie 0.5;

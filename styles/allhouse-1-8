@@ -1,0 +1,11 @@
+order, 1;
+step, 8;
+aa, be 0.25 ba 1.0 bb 0.25 fa 0.5;
+ka, ja 1.0;
+ae, ba 1.0;
+ee, fa 1.0;
+ca, ba 1.0;
+ea, fa 2.5 ba 0.5;
+ga, ba 1.0;
+ia, ea 1.0;
+ma, fa 1.0;

@@ -1,0 +1,12 @@
+order, 1;
+step, 5;
+be, aa 1.0;
+bf, ba 1.0;
+ba, aa 1.0;
+bb, aa 1.0;
+bc, eb 1.0;
+df, aa 1.0;
+de, ai 1.0;
+lh, aa 1.0;
+fa, ic 1.0;
+ig, aa 1.0;

@@ -1,0 +1,10 @@
+order, 1;
+step, 7;
+aa, aa 0.5 ae 0.5;
+me, aa 0.5 ea 0.5;
+ma, ee 0.5 ga 0.5;
+ea, ma 0.5 ea 0.5;
+fa, aa 1.0;
+ia, ia 0.25 aa 1.0 ka 0.25 ea 0.75;
+ie, aa 1.0;
+ja, ca 0.5 ea 0.5;

@@ -1,0 +1,11 @@
+order, 1;
+step, 13;
+lb, ka 1.0;
+ba, aa 1.0;
+bb, aa 2.5 ea 0.5;
+db, aa 1.0 ea 0.5;
+eb, aa 1.0;
+fa, aa 1.0;
+fb, ea 4.0;
+hb, ea 0.5 ma 0.5;
+ha, ea 0.5 ma 0.5;

@@ -1,0 +1,14 @@
+order, 2;
+step, 12;
+maea, bb 1.0;
+meaa, bb 1.0;
+iaca, fa 1.0;
+mfaa, db 1.0;
+iaea, hb 0.333333333333 fb 0.666666666667 db 0.333333333333;
+iaaa, fb 0.4 ha 0.2 db 0.2 bb 0.4 eb 0.2;
+eaia, bb 1.0;
+meea, ha 1.0;
+eama, hb 1.0;
+oeia, lb 1.0;
+aeaa, ba 1.0;
+maaa, bb 1.0;
