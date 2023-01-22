@@ -281,31 +281,26 @@ def balance(patt):
 #########################
 # polyphonic descriptors
 #########################
-def lowstream(pattlist):
-    # monophonic onset pattern of instruments in the low frequency range
-    lowstream = []
+
+
+def get_stream(pattlist, range="low"):
+    # monophonic onset pattern of instruments in the given frequency range: low, mid, or hi
+    stream = []
+
+    range_map = {
+        "low": low_instruments,
+        "mid": mid_instruments,
+        "hi": hi_instruments,
+    }
+
+    if range not in range_map:
+        raise ValueError(f"Invalid range `{range}`. Must be low, mid, or hi")
+
     roll = pattlist_to_pianoroll(pattlist)
     for event in roll:
-        lowstream.append(1 if event[low_instruments].sum() > 0 else 0)
-    return lowstream
+        stream.append(1 if event[range_map[range]].sum() > 0 else 0)
 
-
-def midstream(pattlist):
-    # monophonic onset pattern of instruments in the mid frequency range
-    midstream = []
-    roll = pattlist_to_pianoroll(pattlist)
-    for event in roll:
-        midstream.append(1 if event[mid_instruments].sum() > 0 else 0)
-    return midstream
-
-
-def histream(pattlist):
-    # monophonic onset pattern of instruments in the hi frequency range
-    histream = []
-    roll = pattlist_to_pianoroll(pattlist)
-    for event in roll:
-        histream.append(1 if event[hi_instruments].sum() > 0 else 0)
-    return histream
+    return stream
 
 
 def noi(pattlist):
@@ -435,9 +430,9 @@ def polysync(pattlist):
     # find pairs of N and Ndi notes events in the polyphonic pattlist
     for i in range(len(pattlist)):
 
-        lowstream_ = lowstream(pattlist)
-        midstream_ = midstream(pattlist)
-        histream_ = histream(pattlist)
+        lowstream_ = get_stream(pattlist, range="low")
+        midstream_ = get_stream(pattlist, range="mid")
+        histream_ = get_stream(pattlist, range="hi")
 
         # describe the instruments present in current and nex steps
         event = [lowstream_[i], midstream_[i], histream_[i]]
@@ -507,9 +502,9 @@ def polysync(pattlist):
 def polyevenness(pattlist):
     # compute the polyphonic evenness of a pattlist
     # adapted from [7]
-    lowstream_ = lowstream(pattlist)
-    midstream_ = midstream(pattlist)
-    histream_ = histream(pattlist)
+    lowstream_ = get_stream(pattlist, range="low")
+    midstream_ = get_stream(pattlist, range="mid")
+    histream_ = get_stream(pattlist, range="hi")
 
     low_evenness = evenness(lowstream_)
     mid_evenness = evenness(midstream_)
@@ -523,9 +518,9 @@ def polyevenness(pattlist):
 def polybalance(pattlist):
     # compute the polyphonic balance of a pattlist
     # adapted from [7]
-    lowstream_ = lowstream(pattlist)
-    midstream_ = midstream(pattlist)
-    histream_ = histream(pattlist)
+    lowstream_ = get_stream(pattlist, range="low")
+    midstream_ = get_stream(pattlist, range="mid")
+    histream_ = get_stream(pattlist, range="hi")
     alldensity = density(lowstream_) * 3 + density(midstream_) * 2 + density(histream_)
 
     center = np.array([0, 0])
