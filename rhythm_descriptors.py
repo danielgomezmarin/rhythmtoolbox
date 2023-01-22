@@ -128,6 +128,13 @@ GM_dict = {
 }
 
 
+def pattlist_to_pianoroll(pattlist):
+    roll = np.zeros((len(pattlist), 128))
+    for i in range(len(roll)):
+        roll[i][pattlist[i]] = 1
+    return roll
+
+
 def event_to_8number(midi_notes):
     # input an event list and output a representation
     # in 8 instrumental streams:
@@ -275,44 +282,30 @@ def balance(patt):
 #########################
 # polyphonic descriptors
 #########################
-
-
 def lowstream(pattlist):
     # monophonic onset pattern of instruments in the low frequency range
     lowstream = []
-    for step in pattlist:
-        step_result = 0
-        for instrument in step:
-            if instrument in low_instruments:
-                step_result = 1
-                break
-        lowstream.append(step_result)
+    roll = pattlist_to_pianoroll(pattlist)
+    for event in roll:
+        lowstream.append(1 if event[low_instruments].sum() > 0 else 0)
     return lowstream
 
 
 def midstream(pattlist):
     # monophonic onset pattern of instruments in the mid frequency range
     midstream = []
-    for step in pattlist:
-        step_result = 0
-        for instrument in step:
-            if instrument in mid_instruments:
-                step_result = 1
-                break
-        midstream.append(step_result)
+    roll = pattlist_to_pianoroll(pattlist)
+    for event in roll:
+        midstream.append(1 if event[mid_instruments].sum() > 0 else 0)
     return midstream
 
 
 def histream(pattlist):
     # monophonic onset pattern of instruments in the hi frequency range
     histream = []
-    for step in pattlist:
-        step_result = 0
-        for instrument in step:
-            if instrument in hi_instruments:
-                step_result = 1
-                break
-        histream.append(step_result)
+    roll = pattlist_to_pianoroll(pattlist)
+    for event in roll:
+        histream.append(1 if event[hi_instruments].sum() > 0 else 0)
     return histream
 
 
@@ -439,6 +432,7 @@ def polysync(pattlist):
         -3,
     ]  # metric profile as described by witek
     syncopation_list = []
+
     # find pairs of N and Ndi notes events in the polyphonic pattlist
     for i in range(len(pattlist)):
 
@@ -570,6 +564,7 @@ def pattlist2descriptors(pattlist):
     A pattern list is a list of lists representing time steps, each containing the MIDI notes that occur at that step.
     Velocity is not included.
     """
+
     descriptor_values = [
         noi(pattlist),
         loD(pattlist),
