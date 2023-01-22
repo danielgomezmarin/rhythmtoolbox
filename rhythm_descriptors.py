@@ -543,7 +543,9 @@ def polyD(pattlist):
 def pattlist2descriptors(pattlist):
     """Compute all descriptors from a pattern list representation of a polyphonic drum pattern.
 
-    A pattern list is a list of lists representing time steps, each containing the MIDI notes that occur at that step.
+    A pattern list is a list of lists representing time steps, each containing the MIDI notes that occur at that step,
+    e.g. [[36, 42], [], [37], []]
+
     Velocity is not included.
     """
 
