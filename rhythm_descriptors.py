@@ -15,7 +15,9 @@
 # * [7] "The perceptual relevance of balance, evenness, and entropy in musical rhythms"
 # * [8] "Syncopation, Body-Movement and Pleasure in Groove Music"
 
+import math
 
+import numpy as np
 
 DESCRIPTOR_NAMES = [
     "noi",
@@ -184,9 +186,6 @@ def event_to_3number(midi_notes):
 ##########################
 # monophonic descriptors #
 ##########################
-
-import math
-import numpy as np
 
 
 def density(patt):
