@@ -305,74 +305,62 @@ def get_stream(pattlist, range="low"):
 
 def noi(pattlist):
     # number of different instruments in a pattern
-    noi = len(set([i for s in pattlist for i in s]))
-    return noi
+    return len(set([i for s in pattlist for i in s]))
 
 
 def loD(pattlist):
     # density in the low frequency range
-    loD = sum(lowstream(pattlist))
-    return loD
+    return sum(get_stream(pattlist, range="low"))
 
 
 def midD(pattlist):
     # density in the mid frequency range
-    midD = sum(midstream(pattlist))
-    return midD
+    return sum(get_stream(pattlist, range="mid"))
 
 
 def hiD(pattlist):
     # density in the hi frequency range
-    hiD = sum(histream(pattlist))
-    return hiD
+    return sum(get_stream(pattlist, range="hi"))
 
 
 def stepD(pattlist):
     # percentage of steps that have onsets
-    stepD = sum([1 for x in pattlist if x != []]) / len(pattlist)
-    return stepD
+    return sum([1 for x in pattlist if x != []]) / len(pattlist)
 
 
 def lowness(pattlist):
     # number of onsets in the low freq stream divided by the number of steps that have onsets
-    lowness = loD(pattlist) / sum([1 for x in pattlist if x != []])
-    return lowness
+    return loD(pattlist) / sum([1 for x in pattlist if x != []])
 
 
 def midness(pattlist):
     # number of onsets in the mid freq stream divided by the number of steps that have onsets
-    midness = midD(pattlist) / sum([1 for x in pattlist if x != []])
-    return midness
+    return midD(pattlist) / sum([1 for x in pattlist if x != []])
 
 
 def hiness(pattlist):
     # number of onsets in the hi freq stream divided by the number of steps that have onsets
-    hiness = hiD(pattlist) / sum([1 for x in pattlist if x != []])
-    return hiness
+    return hiD(pattlist) / sum([1 for x in pattlist if x != []])
 
 
 def lowsync(pattlist):
     # syncopation value of the low frequency stream
-    lowsync = syncopation16(lowstream(pattlist))
-    return lowsync
+    return syncopation16(get_stream(pattlist, range="low"))
 
 
 def midsync(pattlist):
     # syncopation value of the mid frequency stream
-    midsync = syncopation16(midstream(pattlist))
-    return midsync
+    return syncopation16(get_stream(pattlist, range="mid"))
 
 
 def hisync(pattlist):
     # syncopation value of the high frequency stream
-    hisync = syncopation16(histream(pattlist))
-    return hisync
+    return syncopation16(get_stream(pattlist, range="hi"))
 
 
 def losyness(pattlist):
     # stream syncopation divided by the number of onsets of the stream
     if loD(pattlist) != 0:
-
         losyness = lowsync(pattlist) / loD(pattlist)
     else:
         losyness = 0
