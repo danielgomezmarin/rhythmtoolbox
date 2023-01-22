@@ -16,6 +16,28 @@
 # * [8] "Syncopation, Body-Movement and Pleasure in Groove Music"
 
 
+
+DESCRIPTOR_NAMES = [
+    "noi",
+    "loD",
+    "midD",
+    "hiD",
+    "stepD",
+    "lowness",
+    "midness",
+    "hiness",
+    "lowsync",
+    "midsync",
+    "hisync",
+    "losyness",
+    "midsyness",
+    "hisyness",
+    "polysync",
+    "polyevenness",
+    "polybalance",
+    "polyD",
+]
+
 ###########################
 # MIDI instrument mapping #
 ###########################
@@ -543,8 +565,12 @@ def polyD(pattlist):
 
 
 def pattlist2descriptors(pattlist):
-    # compute all descriptors from a polyphonic drum pattern.
-    all_descriptors = [
+    """Compute all descriptors from a pattern list representation of a polyphonic drum pattern.
+
+    A pattern list is a list of lists representing time steps, each containing the MIDI notes that occur at that step.
+    Velocity is not included.
+    """
+    descriptor_values = [
         noi(pattlist),
         loD(pattlist),
         midD(pattlist),
@@ -565,29 +591,4 @@ def pattlist2descriptors(pattlist):
         polyD(pattlist),
     ]
 
-    # print ("all_descriptors", all_descriptors)
-
-    return all_descriptors
-
-
-# this is a useful list for making plots and extrcating infromation
-descriptor_name = [
-    "noi",
-    "loD",
-    "midD",
-    "hiD",
-    "stepD",
-    "lowness",
-    "midness",
-    "hiness",
-    "lowsync",
-    "midsync",
-    "hisync",
-    "losyness",
-    "midsyness",
-    "hisyness",
-    "polysync",
-    "polyevenness",
-    "polybalance",
-    "polyD",
-]
+    return {i: j for i, j in zip(DESCRIPTOR_NAMES, descriptor_values)}
