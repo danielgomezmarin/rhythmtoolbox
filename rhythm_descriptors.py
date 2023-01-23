@@ -304,22 +304,31 @@ def hiD(pattlist):
 
 def stepD(pattlist):
     # percentage of steps that have onsets
-    return sum([1 for x in pattlist if x != []]) / len(pattlist)
+    return sum([1 for x in pattlist if x]) / len(pattlist)
 
 
 def lowness(pattlist):
     # number of onsets in the low freq stream divided by the number of steps that have onsets
-    return loD(pattlist) / sum([1 for x in pattlist if x != []])
+    n_onset_steps = sum([1 for x in pattlist if x])
+    if n_onset_steps == 0:
+        return 0
+    return loD(pattlist) / n_onset_steps
 
 
 def midness(pattlist):
     # number of onsets in the mid freq stream divided by the number of steps that have onsets
-    return midD(pattlist) / sum([1 for x in pattlist if x != []])
+    n_onset_steps = sum([1 for x in pattlist if x])
+    if n_onset_steps == 0:
+        return 0
+    return midD(pattlist) / n_onset_steps
 
 
 def hiness(pattlist):
     # number of onsets in the hi freq stream divided by the number of steps that have onsets
-    return hiD(pattlist) / sum([1 for x in pattlist if x != []])
+    n_onset_steps = sum([1 for x in pattlist if x])
+    if n_onset_steps == 0:
+        return 0
+    return hiD(pattlist) / n_onset_steps
 
 
 def lowsync(pattlist):
@@ -509,9 +518,12 @@ def polybalance(pattlist):
     matrixhisum = matrixhi.sum(axis=1)
 
     matrixsum = matrixlowsum + matrixmidsum + matrixhisum
-    magnitude = np.linalg.norm(matrixsum - center) / alldensity
-    balance = 1 - magnitude
-    return balance
+
+    magnitude = 0
+    if alldensity > 0:
+        magnitude = np.linalg.norm(matrixsum - center) / alldensity
+
+    return 1 - magnitude
 
 
 def polyD(pattlist):
