@@ -19,27 +19,6 @@ import math
 
 import numpy as np
 
-DESCRIPTOR_NAMES = [
-    "noi",
-    "loD",
-    "midD",
-    "hiD",
-    "stepD",
-    "lowness",
-    "midness",
-    "hiness",
-    "lowsync",
-    "midsync",
-    "hisync",
-    "losyness",
-    "midsyness",
-    "hisyness",
-    "polysync",
-    "polyevenness",
-    "polybalance",
-    "polyD",
-]
-
 ###########################
 # MIDI instrument mapping #
 ###########################
@@ -543,31 +522,44 @@ def polyD(pattlist):
 def pattlist2descriptors(pattlist):
     """Compute all descriptors from a pattern list representation of a polyphonic drum pattern.
 
-    A pattern list is a list of lists representing time steps, each containing the MIDI notes that occur at that step,
-    e.g. [[36, 42], [], [37], []]
+    A pattern list is a list of lists representing time steps, each containing the MIDI note numbers that occur at that
+    step, e.g. [[36, 42], [], [37], []]. Velocity is not included.
 
-    Velocity is not included.
+    Some descriptors should only be calculated for 16-step patterns. Their values will be None if the pattern of a
+    different length.
     """
 
-    descriptor_values = [
-        noi(pattlist),
-        loD(pattlist),
-        midD(pattlist),
-        hiD(pattlist),
-        stepD(pattlist),
-        lowness(pattlist),
-        midness(pattlist),
-        hiness(pattlist),
-        lowsync(pattlist),
-        midsync(pattlist),
-        hisync(pattlist),
-        losyness(pattlist),
-        midsyness(pattlist),
-        hisyness(pattlist),
-        polysync(pattlist),
-        polyevenness(pattlist),
-        polybalance(pattlist),
-        polyD(pattlist),
-    ]
+    descriptors = {
+        "noi": noi,
+        "loD": loD,
+        "midD": midD,
+        "hiD": hiD,
+        "stepD": stepD,
+        "lowness": lowness,
+        "midness": midness,
+        "hiness": hiness,
+        "polyD": polyD,
+    }
 
-    return {i: j for i, j in zip(DESCRIPTOR_NAMES, descriptor_values)}
+    sixteen_step_descriptors = {
+        "lowsync": lowsync,
+        "midsync": midsync,
+        "hisync": hisync,
+        "losyness": losyness,
+        "midsyness": midsyness,
+        "hisyness": hisyness,
+        "polysync": polysync,
+        "polyevenness": polyevenness,
+        "polybalance": polybalance,
+    }
+
+    result = {}
+    for key, func in descriptors.items():
+        result[key] = func(pattlist)
+
+    for key, func in sixteen_step_descriptors.items():
+        result[key] = None
+        if len(pattlist) == 16:
+            result[key] = func(pattlist)
+
+    return result
