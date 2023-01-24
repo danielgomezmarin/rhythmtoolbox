@@ -537,8 +537,7 @@ def pattlist2descriptors(pattlist):
     A pattern list is a list of lists representing time steps, each containing the MIDI note numbers that occur at that
     step, e.g. [[36, 42], [], [37], []]. Velocity is not included.
 
-    Some descriptors should only be calculated for 16-step patterns. Their values will be None if the pattern of a
-    different length.
+    Some descriptors are valid only for 16-step patterns and will be None if the pattern is not divisible by 16.
     """
 
     descriptors = {
@@ -571,7 +570,11 @@ def pattlist2descriptors(pattlist):
 
     for key, func in sixteen_step_descriptors.items():
         result[key] = None
-        if len(pattlist) == 16:
-            result[key] = func(pattlist)
+        if len(pattlist) % 16 == 0:
+            # Compute the descriptors for each 16-step subpattern
+            vals = []
+            for i in range(len(pattlist) - 16 + 1):
+                vals.append(func(pattlist[i : i + 16]))
+            result[key] = np.mean(vals)
 
     return result
