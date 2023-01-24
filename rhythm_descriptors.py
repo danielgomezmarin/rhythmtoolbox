@@ -348,28 +348,28 @@ def hisync(pattlist):
 
 def losyness(pattlist):
     # stream syncopation divided by the number of onsets of the stream
-    if loD(pattlist) != 0:
-        losyness = lowsync(pattlist) / loD(pattlist)
-    else:
-        losyness = 0
+    losyness = 0
+    d = lowD(pattlist)
+    if d > 0:
+        losyness = lowsync(pattlist) / d
     return losyness
 
 
 def midsyness(pattlist):
     # stream syncopation divided by the number of onsets of the stream
-    if midD(pattlist) != 0:
-        midsyness = midsync(pattlist) / midD(pattlist)
-    else:
-        midsyness = 0
+    midsyness = 0
+    d = midD(pattlist)
+    if d > 0:
+        midsyness = midsync(pattlist) / d
     return midsyness
 
 
 def hisyness(pattlist):
     # stream syncopation divided by the number of onsets of the stream
-    if hiD(pattlist) != 0:
-        hisyness = hisync(pattlist) / hiD(pattlist)
-    else:
-        hisyness = 0
+    hisyness = 0
+    d = hiD(pattlist)
+    if d > 0:
+        hisyness = hisync(pattlist) / d
     return hisyness
 
 
