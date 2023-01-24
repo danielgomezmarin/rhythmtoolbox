@@ -179,12 +179,10 @@ def syncopation16(patt):
     synclist = [0] * 16
     salience_lhl = [5, 1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1]
     for s, step in enumerate(patt):
-        if (
-            patt[s] == 1 and patt[(s + 1) % len(patt)] == 0
-        ):  # look for an onset preceding a silence
-            synclist[s] = (
-                salience_lhl[(s + 1) % len(patt)] - salience_lhl[s]
-            )  # compute syncopations
+        # look for an onset preceding a silence
+        if patt[s] == 1 and patt[(s + 1) % len(patt)] == 0:
+            # compute syncopations
+            synclist[s] = salience_lhl[(s + 1) % len(patt)] - salience_lhl[s]
 
         output = sum(synclist)
 
@@ -199,10 +197,10 @@ def syncopation16_awareness(patt):
     salience = [5, 1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1]
     awareness = [5, 1, 4, 2]
     for s, step in enumerate(patt):
-        if (
-            patt[s] == 1 and patt[(s + 1) % 16] == 0
-        ):  # look for an onset and a silence following
-            synclist[s] = salience[(s + 1) % 16] - salience[s]  # compute syncopations
+        # look for an onset and a silence following
+        if patt[s] == 1 and patt[(s + 1) % 16] == 0:
+            # compute syncopations
+            synclist[s] = salience[(s + 1) % 16] - salience[s]
 
     sync_and_awareness = [
         sum(synclist[0:4]) * awareness[0],
@@ -383,24 +381,8 @@ def polysync(pattlist):
     # greater than or equal to N, then the pair (N, Ndi) is said to
     # constitute a polyphonic syncopation.
 
-    salience_w = [
-        0,
-        -3,
-        -2,
-        -3,
-        -1,
-        -3,
-        -2,
-        -3,
-        -1,
-        -3,
-        -2,
-        -3,
-        -1,
-        -3,
-        -2,
-        -3,
-    ]  # metric profile as described by witek
+    # metric profile as described by witek
+    salience_w = [0, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3]
     syncopation_list = []
 
     # find pairs of N and Ndi notes events in the polyphonic pattlist
@@ -420,9 +402,8 @@ def polysync(pattlist):
         local_syncopation = 0
 
         # syncopation: events are different, and next one has greater or equal metric weight
-        if (
-            event != event_next and salience_w[(i + 1) % len(pattlist)] >= salience_w[i]
-        ):  # only process if there is a syncopation
+        if event != event_next and salience_w[(i + 1) % len(pattlist)] >= salience_w[i]:
+            # only process if there is a syncopation
             # now analyze what type of syncopation is found to assign instrumental weight
             # instrumental weight depends on the relationship between the instruments in the pair:
 
@@ -436,7 +417,7 @@ def polysync(pattlist):
                 )
 
             # mid syncopated against low and high
-            # mid (event[1]) against low and hi (evet_next[0] and event_next[2] respectively)
+            # mid (event[1]) against low and hi (event_next[0] and event_next[2] respectively)
             if event[1] == 1 and event_next[0] == 1 and event_next[2] == 1:
                 instrumental_weight = 1
                 local_syncopation = (
@@ -470,9 +451,8 @@ def polysync(pattlist):
                 )
 
             syncopation_list.append(local_syncopation)
-    # print("list", syncopation_list)
-    polysync = sum(syncopation_list)
-    return polysync
+
+    return sum(syncopation_list)
 
 
 def polyevenness(pattlist):
