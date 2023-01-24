@@ -287,7 +287,7 @@ def noi(pattlist):
     return len(set([i for s in pattlist for i in s]))
 
 
-def loD(pattlist):
+def lowD(pattlist):
     # density in the low frequency range
     return sum(get_stream(pattlist, range="low"))
 
@@ -312,7 +312,7 @@ def lowness(pattlist):
     n_onset_steps = sum([1 for x in pattlist if x])
     if n_onset_steps == 0:
         return 0
-    return loD(pattlist) / n_onset_steps
+    return lowD(pattlist) / n_onset_steps
 
 
 def midness(pattlist):
@@ -346,13 +346,13 @@ def hisync(pattlist):
     return syncopation16(get_stream(pattlist, range="hi"))
 
 
-def losyness(pattlist):
+def lowsyness(pattlist):
     # stream syncopation divided by the number of onsets of the stream
-    losyness = 0
+    lowsyness = 0
     d = lowD(pattlist)
     if d > 0:
-        losyness = lowsync(pattlist) / d
-    return losyness
+        lowsyness = lowsync(pattlist) / d
+    return lowsyness
 
 
 def midsyness(pattlist):
@@ -528,7 +528,7 @@ def polybalance(pattlist):
 
 def polyD(pattlist):
     # compute the total number of onsets
-    return loD(pattlist) + midD(pattlist) + hiD(pattlist)
+    return lowD(pattlist) + midD(pattlist) + hiD(pattlist)
 
 
 def pattlist2descriptors(pattlist):
@@ -542,7 +542,7 @@ def pattlist2descriptors(pattlist):
 
     descriptors = {
         "noi": noi,
-        "loD": loD,
+        "lowD": lowD,
         "midD": midD,
         "hiD": hiD,
         "stepD": stepD,
@@ -556,7 +556,7 @@ def pattlist2descriptors(pattlist):
         "lowsync": lowsync,
         "midsync": midsync,
         "hisync": hisync,
-        "losyness": losyness,
+        "lowsyness": lowsyness,
         "midsyness": midsyness,
         "hisyness": hisyness,
         "polysync": polysync,
