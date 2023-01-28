@@ -6,11 +6,9 @@ from rhythm_descriptors import (
     syncopation16_awareness,
     evenness,
     balance,
-    lowstream,
-    midstream,
-    histream,
+    get_stream,
     noi,
-    loD,
+    lowD,
     midD,
     hiD,
     stepD,
@@ -20,7 +18,7 @@ from rhythm_descriptors import (
     lowsync,
     midsync,
     hisync,
-    losyness,
+    lowsyness,
     midsyness,
     hisyness,
     polysync,
@@ -126,22 +124,120 @@ def test_balance():
     assert balance(PATT_2) == 0.9609819355967744
 
 
-def test_lowstream():
-    assert lowstream(BOSKA_3) == [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0]
-    assert lowstream(BOSKA_8) == [0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0]
-    assert lowstream(BOSKA_9) == [1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0]
+def test_get_stream():
+    assert get_stream(BOSKA_3, "low") == [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+    ]
+    assert get_stream(BOSKA_8, "low") == [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+    ]
+    assert get_stream(BOSKA_9, "low") == [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+    ]
 
+    assert get_stream(BOSKA_3, "mid") == [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+    ]
+    assert get_stream(BOSKA_8, "mid") == [
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+    ]
+    assert get_stream(BOSKA_9, "mid") == [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+    ]
 
-def test_midstream():
-    assert midstream(BOSKA_3) == [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0]
-    assert midstream(BOSKA_8) == [1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1]
-    assert midstream(BOSKA_9) == [0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1]
-
-
-def test_histream():
-    assert histream(BOSKA_3) == [1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0]
-    assert histream(BOSKA_8) == [1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0]
-    assert histream(BOSKA_9) == [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1]
+    assert get_stream(BOSKA_3, "hi") == [1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0]
+    assert get_stream(BOSKA_8, "hi") == [1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0]
+    assert get_stream(BOSKA_9, "hi") == [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1]
 
 
 def test_noi():
@@ -150,10 +246,10 @@ def test_noi():
     assert noi(BOSKA_9) == 6
 
 
-def test_loD():
-    assert loD(BOSKA_3) == 4
-    assert loD(BOSKA_8) == 6
-    assert loD(BOSKA_9) == 8
+def test_lowD():
+    assert lowD(BOSKA_3) == 4
+    assert lowD(BOSKA_8) == 6
+    assert lowD(BOSKA_9) == 8
 
 
 def test_midD():
@@ -210,10 +306,10 @@ def test_hisync():
     assert hisync(BOSKA_9) == -12
 
 
-def test_losyness():
-    assert losyness(BOSKA_3) == -1.75
-    assert losyness(BOSKA_8) == 0.5
-    assert losyness(BOSKA_9) == 0.5
+def test_lowsyness():
+    assert lowsyness(BOSKA_3) == -1.75
+    assert lowsyness(BOSKA_8) == 0.5
+    assert lowsyness(BOSKA_9) == 0.5
 
 
 def test_midsyness():
@@ -253,7 +349,7 @@ def test_polyD():
 
 
 def test_pattlist2descriptors():
-    assert pattlist2descriptors(BOSKA_3) == [
+    assert list(pattlist2descriptors(BOSKA_3).values()) == [
         5,
         4,
         5,
@@ -262,18 +358,18 @@ def test_pattlist2descriptors():
         0.36363636363636365,
         0.45454545454545453,
         0.9090909090909091,
-        -7,
-        -4,
-        -10,
+        19,
+        -7.0,
+        -4.0,
+        -10.0,
         -1.75,
         -0.8,
         -1.0,
-        9,
+        9.0,
         5.2753683906977775,
         0.9618538544571633,
-        19,
     ]
-    assert pattlist2descriptors(BOSKA_8) == [
+    assert list(pattlist2descriptors(BOSKA_8).values()) == [
         4,
         6,
         10,
@@ -282,18 +378,18 @@ def test_pattlist2descriptors():
         0.375,
         0.625,
         0.5625,
-        3,
-        -4,
-        -5,
+        25,
+        3.0,
+        -4.0,
+        -5.0,
         0.5,
         -0.4,
         -0.5555555555555556,
-        7,
+        7.0,
         4.428794764473658,
         0.9961791398488665,
-        25,
     ]
-    assert pattlist2descriptors(BOSKA_9) == [
+    assert list(pattlist2descriptors(BOSKA_9).values()) == [
         6,
         8,
         7,
@@ -302,14 +398,14 @@ def test_pattlist2descriptors():
         0.5714285714285714,
         0.5,
         0.6428571428571429,
-        4,
-        2,
-        -12,
+        24,
+        4.0,
+        2.0,
+        -12.0,
         0.5,
         0.2857142857142857,
         -1.3333333333333333,
-        20,
+        20.0,
         4.9758868520193955,
         0.7964353630870814,
-        24,
     ]
