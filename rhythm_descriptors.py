@@ -15,12 +15,6 @@
 # * [7] "The perceptual relevance of balance, evenness, and entropy in musical rhythms"
 # * [8] "Syncopation, Body-Movement and Pleasure in Groove Music"
 
-import numpy as np
-from scipy import ndimage
-from scipy import stats
-import matplotlib.pyplot as plt
-from sklearn.metrics import pairwise_distances
-import random
 
 ###########################
 # MIDI instrument mapping #
