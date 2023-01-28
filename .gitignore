@@ -5,3 +5,4 @@ __pycache__/
 *.egg-info/
 tests/results/
 .DS_Store
+*.pyc
