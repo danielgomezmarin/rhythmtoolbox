@@ -109,29 +109,22 @@ GM_dict = {
 }
 
 
-def pattlist_to_pianoroll(pattlist):
-    roll = np.zeros((len(pattlist), 128))
-    for i in range(len(roll)):
-        roll[i][pattlist[i]] = 1
-    return roll
-
-
 def event_to_8number(midi_notes):
     # input an event list and output a representation
     # in 8 instrumental streams:
     # kick, snare, rimshot, clap, closed hihat, open hihat, low tom, high tom
     output = []
     # make sure the event has notes
-    if len(midi_notes) > 0:
-        for x in midi_notes:
-            # print("x", x)
-            output.append(GM_dict[x][4])
+    if len(midi_notes) == 0:
+        return [0]
 
-        # otherwise it is a silence
-        output = list(set(output))
-        output.sort()
-    else:
-        output = [0]
+    for x in midi_notes:
+        # print("x", x)
+        output.append(GM_dict[x][4])
+
+    # otherwise it is a silence
+    output = list(set(output))
+    output.sort()
 
     return output
 
@@ -142,22 +135,22 @@ def event_to_3number(midi_notes):
     # low, mid, high
     output = []
     # make sure the event has notes
-    if len(midi_notes) > 0:
-        for x in midi_notes:
-            category = GM_dict[x][1]
-            if category == "low":
-                category_number = 1
-            elif category == "mid":
-                category_number = 2
-            else:
-                category_number = 3
-            output.append(category_number)
+    if len(midi_notes) == 0:
+        return [0]
 
-        # otherwise it is a silence
-        output = list(set(output))
-        output.sort()
-    else:
-        output = [0]
+    for x in midi_notes:
+        category = GM_dict[x][1]
+        if category == "low":
+            category_number = 1
+        elif category == "mid":
+            category_number = 2
+        else:
+            category_number = 3
+        output.append(category_number)
+
+    # otherwise it is a silence
+    output = list(set(output))
+    output.sort()
 
     return output
 
@@ -169,8 +162,7 @@ def event_to_3number(midi_notes):
 
 def density(patt):
     # count the onsets in a pattern
-    density = sum([x for x in patt if x == 1])
-    return density
+    return sum([x for x in patt if x == 1])
 
 
 def syncopation16(patt):
@@ -181,12 +173,10 @@ def syncopation16(patt):
     for s, step in enumerate(patt):
         # look for an onset preceding a silence
         if patt[s] == 1 and patt[(s + 1) % len(patt)] == 0:
-            # compute syncopations
+            # compute syncopation
             synclist[s] = salience_lhl[(s + 1) % len(patt)] - salience_lhl[s]
 
-        output = sum(synclist)
-
-    return output
+    return sum(synclist)
 
 
 def syncopation16_awareness(patt):
@@ -199,18 +189,18 @@ def syncopation16_awareness(patt):
     for s, step in enumerate(patt):
         # look for an onset and a silence following
         if patt[s] == 1 and patt[(s + 1) % 16] == 0:
-            # compute syncopations
+            # compute syncopation
             synclist[s] = salience[(s + 1) % 16] - salience[s]
 
+    # apply awareness
     sync_and_awareness = [
         sum(synclist[0:4]) * awareness[0],
         sum(synclist[4:8]) * awareness[1],
         sum(synclist[8:12]) * awareness[2],
         sum(synclist[12:16]) * awareness[3],
-    ]  # apply awareness
-    output = sum(sync_and_awareness)
+    ]
 
-    return output
+    return sum(sync_and_awareness)
 
 
 def evenness(patt):
@@ -221,22 +211,21 @@ def evenness(patt):
     # o1, o2, o3, o4 to positions 0 4 8 and 12
     # here we will use a simple algorithm that does not involve DFT computation
     # evenness is well described in [6] but this implementation is much simpler
-    if density(patt) != 0:
-        dens = density(patt)
-        iso_angle_16 = 2 * math.pi / 16
-        first_onset_step = [i for i, x in enumerate(patt) if x == 1][0]
-        first_onset_angle = first_onset_step * iso_angle_16
-        iso_angle = 2 * math.pi / dens
-        iso_patt_radians = [x * iso_angle for x in range(dens)]
-        patt_radians = [i * iso_angle_16 for i, x in enumerate(patt) if x == 1]
-        cosines = [
-            abs(math.cos(x - patt_radians[i] + first_onset_angle))
-            for i, x in enumerate(iso_patt_radians)
-        ]
-        evenness = sum(cosines) / dens
-    else:
-        evenness = 0
-    return evenness
+    d = density(patt)
+    if d == 0:
+        return 0
+
+    iso_angle_16 = 2 * math.pi / 16
+    first_onset_step = [i for i, x in enumerate(patt) if x == 1][0]
+    first_onset_angle = first_onset_step * iso_angle_16
+    iso_angle = 2 * math.pi / d
+    iso_patt_radians = [x * iso_angle for x in range(d)]
+    patt_radians = [i * iso_angle_16 for i, x in enumerate(patt) if x == 1]
+    cosines = [
+        abs(math.cos(x - patt_radians[i] + first_onset_angle))
+        for i, x in enumerate(iso_patt_radians)
+    ]
+    return sum(cosines) / d
 
 
 def balance(patt):
@@ -244,20 +233,30 @@ def balance(patt):
     # "a quantification of the proximity of that rhythm's
     # “centre of mass” (the mean position of the points)
     # to the centre of the unit circle."
+    d = density(patt)
+    if d == 0:
+        return 1
+
     center = np.array([0, 0])
     iso_angle_16 = 2 * math.pi / 16
     X = [math.cos(i * iso_angle_16) for i, x in enumerate(patt) if x == 1]
     Y = [math.sin(i * iso_angle_16) for i, x in enumerate(patt) if x == 1]
     matrix = np.array([X, Y])
-    matrixsum = matrix.sum(axis=1)
-    magnitude = np.linalg.norm(matrixsum - center) / density(patt)
-    balance = 1 - magnitude
-    return balance
+    matrix_sum = matrix.sum(axis=1)
+    magnitude = np.linalg.norm(matrix_sum - center) / d
+    return 1 - magnitude
 
 
 #########################
 # polyphonic descriptors
 #########################
+
+
+def pattlist_to_pianoroll(pattlist):
+    roll = np.zeros((len(pattlist), 128))
+    for i in range(len(roll)):
+        roll[i][pattlist[i]] = 1
+    return roll
 
 
 def get_stream(pattlist, range="low"):
@@ -307,68 +306,53 @@ def stepD(pattlist):
 
 def lowness(pattlist):
     # number of onsets in the low freq stream divided by the number of steps that have onsets
-    n_onset_steps = sum([1 for x in pattlist if x])
-    if n_onset_steps == 0:
-        return 0
-    return lowD(pattlist) / n_onset_steps
+    n = sum([1 for x in pattlist if x])
+    return lowD(pattlist) / n if n else 0
 
 
 def midness(pattlist):
     # number of onsets in the mid freq stream divided by the number of steps that have onsets
-    n_onset_steps = sum([1 for x in pattlist if x])
-    if n_onset_steps == 0:
-        return 0
-    return midD(pattlist) / n_onset_steps
+    n = sum([1 for x in pattlist if x])
+    return midD(pattlist) / n if n else 0
 
 
 def hiness(pattlist):
     # number of onsets in the hi freq stream divided by the number of steps that have onsets
-    n_onset_steps = sum([1 for x in pattlist if x])
-    if n_onset_steps == 0:
-        return 0
-    return hiD(pattlist) / n_onset_steps
+    n = sum([1 for x in pattlist if x])
+    return hiD(pattlist) / n if n else 0
 
 
 def lowsync(pattlist):
-    # syncopation value of the low frequency stream
+    # syncopation value of the low-frequency stream
     return syncopation16(get_stream(pattlist, range="low"))
 
 
 def midsync(pattlist):
-    # syncopation value of the mid frequency stream
+    # syncopation value of the mid-frequency stream
     return syncopation16(get_stream(pattlist, range="mid"))
 
 
 def hisync(pattlist):
-    # syncopation value of the high frequency stream
+    # syncopation value of the high-frequency stream
     return syncopation16(get_stream(pattlist, range="hi"))
 
 
 def lowsyness(pattlist):
     # stream syncopation divided by the number of onsets of the stream
-    lowsyness = 0
     d = lowD(pattlist)
-    if d > 0:
-        lowsyness = lowsync(pattlist) / d
-    return lowsyness
+    return lowsync(pattlist) / d if d else 0
 
 
 def midsyness(pattlist):
     # stream syncopation divided by the number of onsets of the stream
-    midsyness = 0
     d = midD(pattlist)
-    if d > 0:
-        midsyness = midsync(pattlist) / d
-    return midsyness
+    return midsync(pattlist) / d if d else 0
 
 
 def hisyness(pattlist):
     # stream syncopation divided by the number of onsets of the stream
-    hisyness = 0
     d = hiD(pattlist)
-    if d > 0:
-        hisyness = hisync(pattlist) / d
-    return hisyness
+    return hisync(pattlist) / d if d else 0
 
 
 def polysync(pattlist):
@@ -477,7 +461,10 @@ def polybalance(pattlist):
     lowstream_ = get_stream(pattlist, range="low")
     midstream_ = get_stream(pattlist, range="mid")
     histream_ = get_stream(pattlist, range="hi")
-    alldensity = density(lowstream_) * 3 + density(midstream_) * 2 + density(histream_)
+
+    d = density(lowstream_) * 3 + density(midstream_) * 2 + density(histream_)
+    if d == 0:
+        return 1
 
     center = np.array([0, 0])
     iso_angle_16 = 2 * math.pi / 16
@@ -499,9 +486,7 @@ def polybalance(pattlist):
 
     matrixsum = matrixlowsum + matrixmidsum + matrixhisum
 
-    magnitude = 0
-    if alldensity > 0:
-        magnitude = np.linalg.norm(matrixsum - center) / alldensity
+    magnitude = np.linalg.norm(matrixsum - center) / d
 
     return 1 - magnitude
 
