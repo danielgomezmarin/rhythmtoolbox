@@ -1,163 +1,25 @@
-# this script contains descriptors meant to be extracted
-# form symbolic polyphonic drum patterns
-#
-# the descriptors are coded as separated functions
-# that can be run independently
-#
-# most of them are reported in different papers
-# related to polyphonic drum analysis and generation
-# * [1] "Similarity and Style in Electronic Dance Music Drum Rhythms"section 3.4
-# * [2] "Strictly Rhythm: Exploring the Effects of Identical Regions and Meter Induction in Rhythmic Similarity Perception"
-# * [3] "PAD and SAD: Two Awareness-Weighted Rhythmic Similarity Distances"
-# * [4] "Drum rhythm spaces: From polyphonic similarity to generative maps"
-# * [5] "Real-Time Drum Accompaniment Using Transformer Architecture"
-# * [6] "Computational Creation and Morphing of Multilevel Rhythms by Control of Evenness"
-# * [7] "The perceptual relevance of balance, evenness, and entropy in musical rhythms"
-# * [8] "Syncopation, Body-Movement and Pleasure in Groove Music"
+"""
+This module implements a variety of descriptors for polyphonic drum patterns from scientific research related to
+drum analysis and generation.
+
+References
+- [1] "Similarity and Style in Electronic Dance Music Drum Rhythms"section 3.4
+- [2] "Strictly Rhythm: Exploring the Effects of Identical Regions and Meter Induction in Rhythmic Similarity Perception"
+- [3] "PAD and SAD: Two Awareness-Weighted Rhythmic Similarity Distances"
+- [4] "Drum rhythm spaces: From polyphonic similarity to generative maps"
+- [5] "Real-Time Drum Accompaniment Using Transformer Architecture"
+- [6] "Computational Creation and Morphing of Multilevel Rhythms by Control of Evenness"
+- [7] "The perceptual relevance of balance, evenness, and entropy in musical rhythms"
+- [8] "Syncopation, Body-Movement and Pleasure in Groove Music"
+"""
 
 import math
 
 import numpy as np
 
-###########################
-# MIDI instrument mapping #
-###########################
-low_instruments = [35, 36, 41, 45, 47, 64]
-mid_instruments = [37, 38, 39, 40, 43, 48, 50, 58, 61, 62, 65, 77]
-hi_instruments = [
-    22,
-    26,
-    42,
-    44,
-    46,
-    49,
-    51,
-    52,
-    53,
-    54,
-    55,
-    56,
-    57,
-    59,
-    60,
-    62,
-    69,
-    70,
-    71,
-    72,
-    76,
-]
+from .midi_mapping import hi_instruments, low_instruments, mid_instruments
 
-GM_dict = {
-    # key is midi note number
-    # values are:
-    # [0] name (as string)
-    # [1] name category low mid or high (as string)
-    # [2] substiture midi number for simplified MIDI
-    # [3] name of instrument for 8 note conversion (as string)
-    # [4] number of instrument for 8 note conversion
-    # [5] substiture midi number for conversion to 8 note
-    22: ["Closed Hi-Hat edge", "high", 42, "CH", 3, 42],
-    26: ["Open Hi-Hat edge", "high", 46, "OH", 4, 46],
-    35: ["Acoustic Bass Drum", "low", 36, "K", 1, 36],
-    36: ["Bass Drum 1", "low", 36, "K", 1, 36],
-    37: ["Side Stick", "mid", 37, "RS", 6, 37],
-    38: ["Acoustic Snare", "mid", 38, "SN", 2, 38],
-    39: ["Hand Clap", "mid", 39, "CP", 5, 39],
-    40: ["Electric Snare", "mid", 38, "SN", 2, 38],
-    41: ["Low Floor Tom", "low", 45, "LT", 7, 45],
-    42: ["Closed Hi Hat", "high", 42, "CH", 3, 42],
-    43: ["High Floor Tom", "mid", 45, "HT", 8, 45],
-    44: ["Pedal Hi-Hat", "high", 46, "OH", 4, 46],
-    45: ["Low Tom", "low", 45, "LT", 7, 45],
-    46: ["Open Hi-Hat", "high", 46, "OH", 4, 46],
-    47: ["Low-Mid Tom", "low", 47, "MT", 7, 45],
-    48: ["Hi-Mid Tom", "mid", 47, "MT", 7, 45],
-    49: ["Crash Cymbal 1", "high", 49, "CC", 4, 46],
-    50: ["High Tom", "mid", 50, "HT", 8, 50],
-    51: ["Ride Cymbal 1", "high", 51, "RC", -1, 42],
-    52: ["Chinese Cymbal", "high", 52, "", -1, 46],
-    53: ["Ride Bell", "high", 53, "", -1, 42],
-    54: ["Tambourine", "high", 54, "", -1, 42],
-    55: ["Splash Cymbal", "high", 55, "OH", 4, 46],
-    56: ["Cowbell", "high", 56, "CB", -1, -1],
-    57: ["Crash Cymbal 2", "high", 57, "CC", 4, 46],
-    58: ["Vibraslap", "mid", 58, "VS", 6, 37],
-    59: ["Ride Cymbal 2", "high", 59, "RC", 3, 42],
-    60: ["Hi Bongo", "high", 60, "LB", 8],
-    61: ["Low Bongo", "mid", 61, "HB", 7],
-    62: ["Mute Hi Conga", "mid", 62, "MC", 8, 50],
-    63: ["Open Hi Conga", "high", 63, "HC", 8, 50],
-    64: ["Low Conga", "low", 64, "LC", 7, 45],
-    65: ["High Timbale", "mid", 65, "", 8],
-    66: ["Low Timbale", "low", 66, "", 7],
-    67: ["High Agogo", "", 67, "", -1],
-    68: ["Low Agogo", "", 68, "", -1],
-    69: ["Cabasa", "high", 70, "MA", -1],
-    70: ["Maracas", "high", 70, "MA", -1],
-    71: ["Short Whistle", "high", 71, "", -1],
-    72: ["Long Whistle", "high", 72, ",-1"],
-    73: ["Short Guiro", "", 73, "", -1],
-    74: ["Long Guiro", "", 74, "", -1],
-    75: ["Claves", "high", 75, "", -1],
-    76: ["Hi Wood Block", "high", 76, "", 8],
-    77: ["Low Wood Block", "mid", 77, "", 7],
-    78: ["Mute Cuica", "", 78, "", -1],
-    79: ["Open Cuica", "", 79, "", -1],
-    80: ["Mute Triangle", "", 80, "", -1],
-    81: ["Open Triangle", "", 81, "", -1],
-}
-
-
-def event_to_8number(midi_notes):
-    # input an event list and output a representation
-    # in 8 instrumental streams:
-    # kick, snare, rimshot, clap, closed hihat, open hihat, low tom, high tom
-    output = []
-    # make sure the event has notes
-    if len(midi_notes) == 0:
-        return [0]
-
-    for x in midi_notes:
-        # print("x", x)
-        output.append(GM_dict[x][4])
-
-    # otherwise it is a silence
-    output = list(set(output))
-    output.sort()
-
-    return output
-
-
-def event_to_3number(midi_notes):
-    # input an event list and output a representation
-    # in 3 instrumental streams:
-    # low, mid, high
-    output = []
-    # make sure the event has notes
-    if len(midi_notes) == 0:
-        return [0]
-
-    for x in midi_notes:
-        category = GM_dict[x][1]
-        if category == "low":
-            category_number = 1
-        elif category == "mid":
-            category_number = 2
-        else:
-            category_number = 3
-        output.append(category_number)
-
-    # otherwise it is a silence
-    output = list(set(output))
-    output.sort()
-
-    return output
-
-
-##########################
-# monophonic descriptors #
-##########################
+# Monophonic descriptors
 
 
 def density(patt):
@@ -247,9 +109,7 @@ def balance(patt):
     return 1 - magnitude
 
 
-#########################
-# polyphonic descriptors
-#########################
+# Polyphonic descriptors
 
 
 def pattlist_to_pianoroll(pattlist):
@@ -391,8 +251,8 @@ def polysync(pattlist):
             # now analyze what type of syncopation is found to assign instrumental weight
             # instrumental weight depends on the relationship between the instruments in the pair:
 
-            ##### three-stream syncopations:
-            # low (event[0]) against mid and hi (event_next[1] and event_next[2] respectively)
+            # Three-stream syncopation
+            # Low against mid and hi
             if event[0] == 1 and event_next[1] == 1 and event_next[2] == 1:
                 instrumental_weight = 2
                 local_syncopation = (
@@ -400,8 +260,7 @@ def polysync(pattlist):
                     + instrumental_weight
                 )
 
-            # mid syncopated against low and high
-            # mid (event[1]) against low and hi (event_next[0] and event_next[2] respectively)
+            # Mid against low and high mid against low and hi
             if event[1] == 1 and event_next[0] == 1 and event_next[2] == 1:
                 instrumental_weight = 1
                 local_syncopation = (
@@ -409,8 +268,8 @@ def polysync(pattlist):
                     + instrumental_weight
                 )
 
-            ##### two stream syncopations:
-            # low or mid vs high
+            # Two-stream syncopation
+            # Low or mid against high
             if (event[0] == 1 or event[1] == 1) and event_next == [0, 0, 1]:
                 instrumental_weight = 5
                 local_syncopation = (
@@ -418,7 +277,7 @@ def polysync(pattlist):
                     + instrumental_weight
                 )
 
-            # low vs mid (ATTENTION: not on Witek's paper)
+            # Low against mid (ATTENTION: not defined in [8])
             if event == [1, 0, 0] and event_next == [0, 1, 0]:
                 instrumental_weight = 2
                 local_syncopation = (
@@ -426,7 +285,7 @@ def polysync(pattlist):
                     + instrumental_weight
                 )
 
-            # mid vs low (ATTENTION: not on Witek's paper)
+            # Mid against low (ATTENTION: not defined in [8])
             if event == [0, 1, 0] and event_next == [1, 0, 0]:
                 instrumental_weight = 2
                 local_syncopation = (
@@ -494,52 +353,3 @@ def polybalance(pattlist):
 def polyD(pattlist):
     # compute the total number of onsets
     return lowD(pattlist) + midD(pattlist) + hiD(pattlist)
-
-
-def pattlist2descriptors(pattlist):
-    """Compute all descriptors from a pattern list representation of a polyphonic drum pattern.
-
-    A pattern list is a list of lists representing time steps, each containing the MIDI note numbers that occur at that
-    step, e.g. [[36, 42], [], [37], []]. Velocity is not included.
-
-    Some descriptors are valid only for 16-step patterns and will be None if the pattern is not divisible by 16.
-    """
-
-    descriptors = {
-        "noi": noi,
-        "lowD": lowD,
-        "midD": midD,
-        "hiD": hiD,
-        "stepD": stepD,
-        "lowness": lowness,
-        "midness": midness,
-        "hiness": hiness,
-        "polyD": polyD,
-    }
-
-    sixteen_step_descriptors = {
-        "lowsync": lowsync,
-        "midsync": midsync,
-        "hisync": hisync,
-        "lowsyness": lowsyness,
-        "midsyness": midsyness,
-        "hisyness": hisyness,
-        "polysync": polysync,
-        "polyevenness": polyevenness,
-        "polybalance": polybalance,
-    }
-
-    result = {}
-    for key, func in descriptors.items():
-        result[key] = func(pattlist)
-
-    for key, func in sixteen_step_descriptors.items():
-        result[key] = None
-        if len(pattlist) % 16 == 0:
-            # Compute the descriptors for each 16-step subpattern
-            vals = []
-            for i in range(len(pattlist) - 16 + 1):
-                vals.append(func(pattlist[i : i + 16]))
-            result[key] = np.mean(vals)
-
-    return result
