@@ -1,6 +1,5 @@
-from rhythm_descriptors import (
-    event_to_8number,
-    event_to_3number,
+from rhythmtoolbox import pattlist2descriptors
+from rhythmtoolbox.descriptors import (
     density,
     syncopation16,
     syncopation16_awareness,
@@ -25,7 +24,10 @@ from rhythm_descriptors import (
     polyevenness,
     polybalance,
     polyD,
-    pattlist2descriptors,
+)
+from rhythmtoolbox.midi_mapping import (
+    event_to_8number,
+    event_to_3number,
 )
 
 PATT_1 = [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0]
@@ -87,16 +89,6 @@ BOSKA_9 = [
     [37, 38, 39, 42, 46],
     [38, 46],
 ]
-
-
-def test_event_to_8number():
-    assert event_to_8number([36, 38, 46]) == [1, 2, 4]
-    assert event_to_8number([37, 38, 39, 42, 46]) == [2, 3, 4, 5, 6]
-
-
-def test_event_to_3number():
-    assert event_to_3number([36, 38, 46]) == [1, 2, 3]
-    assert event_to_3number([37, 38, 39, 42, 46]) == [2, 3]
 
 
 def test_density():
@@ -409,3 +401,13 @@ def test_pattlist2descriptors():
         4.9758868520193955,
         0.7964353630870814,
     ]
+
+
+def test_event_to_8number():
+    assert event_to_8number([36, 38, 46]) == [1, 2, 4]
+    assert event_to_8number([37, 38, 39, 42, 46]) == [2, 3, 4, 5, 6]
+
+
+def test_event_to_3number():
+    assert event_to_3number([36, 38, 46]) == [1, 2, 3]
+    assert event_to_3number([37, 38, 39, 42, 46]) == [2, 3]
