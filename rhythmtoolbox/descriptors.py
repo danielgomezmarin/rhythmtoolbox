@@ -3,19 +3,38 @@ This module implements a variety of descriptors for polyphonic drum patterns fro
 drum analysis and generation.
 
 References
-- [1] "Similarity and Style in Electronic Dance Music Drum Rhythms"section 3.4
-- [2] "Strictly Rhythm: Exploring the Effects of Identical Regions and Meter Induction in Rhythmic Similarity Perception"
-- [3] "PAD and SAD: Two Awareness-Weighted Rhythmic Similarity Distances"
-- [4] "Drum rhythm spaces: From polyphonic similarity to generative maps"
-- [5] "Real-Time Drum Accompaniment Using Transformer Architecture"
-- [6] "Computational Creation and Morphing of Multilevel Rhythms by Control of Evenness"
-- [7] "The perceptual relevance of balance, evenness, and entropy in musical rhythms"
-- [8] "Syncopation, Body-Movement and Pleasure in Groove Music"
+
+- [1] Gómez Marín, D. (2018). Similarity and style in electronic dance music drum rhythms (Doctoral dissertation,
+  Universitat Pompeu Fabra).
+
+- [2] Gómez-Marín, D., Jorda, S., & Herrera, P. (2016). Strictly Rhythm: Exploring the effects of identical regions and
+  meter induction in rhythmic similarity perception. In Music, Mind, and Embodiment: 11th International Symposium, CMMR
+  2015, Plymouth, UK, June 16-19, 2015, Revised Selected Papers 11 (pp. 449-463). Springer International Publishing.
+
+- [3] Gómez Marín, D., Jordà Puig, S., & Boyer, H. (2015). Pad and Sad: Two awareness-Weighted rhythmic similarity
+  distances. In Müller M, Wiering F, editors. Proceedings of the 16th International Society for Music Information
+  Retrieval (ISMIR) Conference; 2015 Oct 26-30; Málaga, Spain. Canada: International Society for Music Information
+  Retrieval; 2015.. International Society for Music Information Retrieval (ISMIR).
+
+- [4] Gómez-Marín, D., Jordà, S., & Herrera, P. (2020). Drum rhythm spaces: From polyphonic similarity to generative
+  maps. Journal of New Music Research, 49(5), 438-456.
+
+- [5] Haki, B., Nieto, M., Pelinski, T., & Jordà, S. Real-Time Drum Accompaniment Using Transformer Architecture.
+
+- [6] Milne, A. J., & Dean, R. T. (2016). Computational creation and morphing of multilevel rhythms by control of
+  evenness. Computer Music Journal, 40(1), 35-53.
+
+- [7] Milne, A. J., & Herff, S. A. (2020). The perceptual relevance of balance, evenness, and entropy in musical
+  rhythms. Cognition, 203, 104233.
+
+- [8] Witek, M. A., Clarke, E. F., Wallentin, M., Kringelbach, M. L., & Vuust, P. (2014). Syncopation, body-movement and
+  pleasure in groove music. PloS one, 9(4), e94446.
 """
 
 import math
 
 import numpy as np
+
 
 # Monophonic descriptors
 
