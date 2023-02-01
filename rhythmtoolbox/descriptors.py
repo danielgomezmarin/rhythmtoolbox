@@ -19,6 +19,7 @@ import numpy as np
 
 from .midi_mapping import hi_instruments, low_instruments, mid_instruments
 
+
 # Monophonic descriptors
 
 
@@ -113,7 +114,7 @@ def balance(patt):
 
 
 def get_stream(roll, band="low"):
-    """Returns a monophonic onset pattern of instruments in the given frequency band:
+    """Returns a monophonic onset pattern of instruments in the given frequency band.
 
     roll, np.array
         Piano roll
@@ -210,14 +211,13 @@ def hisyness(roll):
 
 
 def polysync(roll):
-    # polyphonic syncopation as described in [8]
-    # If N is a note that precedes a rest, R,
-    # and R has a metric weight greater than or equal to N,
-    # then the pair (N, R) is said to constitute a monophonic syncopation.
-    # If N is a note on a certain instrument that precedes a note
-    # on a different instrument (Ndi), and Ndi has a metric weight
-    # greater than or equal to N, then the pair (N, Ndi) is said to
-    # constitute a polyphonic syncopation.
+    """Computes the polyphonic syncopation of a rhythm, as described in [8].
+
+     If N is a note that precedes a rest R, and R has a metric weight greater than or equal to N, then the pair (N, R)
+     is said to constitute a monophonic syncopation. If N is a note on a certain instrument that precedes a note on a
+     different instrument (Ndi), and Ndi has a metric weight greater than or equal to N, then the pair (N, Ndi) is said
+     to constitute a polyphonic syncopation.
+    """
 
     # metric profile as described by witek
     salience_w = [0, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3]
@@ -226,12 +226,13 @@ def polysync(roll):
     # number of time steps
     n = len(roll)
 
+    # Get the onset pattern of each instrument band
+    lowstream_ = get_stream(roll, band="low")
+    midstream_ = get_stream(roll, band="mid")
+    histream_ = get_stream(roll, band="hi")
+
     # find pairs of N and Ndi notes events
     for i in range(n):
-        lowstream_ = get_stream(roll, band="low")
-        midstream_ = get_stream(roll, band="mid")
-        histream_ = get_stream(roll, band="hi")
-
         # describe the instruments present in current and nex steps
         event = [lowstream_[i], midstream_[i], histream_[i]]
         event_next = [
@@ -252,14 +253,14 @@ def polysync(roll):
             if event[0] == 1 and event_next[1] == 1 and event_next[2] == 1:
                 instrumental_weight = 2
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
+                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             # Mid against low and high mid against low and hi
             if event[1] == 1 and event_next[0] == 1 and event_next[2] == 1:
                 instrumental_weight = 1
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
+                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             # Two-stream syncopation
@@ -267,21 +268,21 @@ def polysync(roll):
             if (event[0] == 1 or event[1] == 1) and event_next == [0, 0, 1]:
                 instrumental_weight = 5
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
+                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             # Low against mid (ATTENTION: not defined in [8])
             if event == [1, 0, 0] and event_next == [0, 1, 0]:
                 instrumental_weight = 2
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
+                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             # Mid against low (ATTENTION: not defined in [8])
             if event == [0, 1, 0] and event_next == [1, 0, 0]:
                 instrumental_weight = 2
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
+                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             syncopation_list.append(local_syncopation)
