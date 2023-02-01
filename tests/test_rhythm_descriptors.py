@@ -124,7 +124,7 @@ def test_balance():
 
 
 def test_get_stream():
-    assert get_stream(BOSKA_3, "low") == [
+    assert get_stream(BOSKA_3, "low").tolist() == [
         1,
         0,
         0,
@@ -142,7 +142,7 @@ def test_get_stream():
         1,
         0,
     ]
-    assert get_stream(BOSKA_8, "low") == [
+    assert get_stream(BOSKA_8, "low").tolist() == [
         0,
         0,
         0,
@@ -160,7 +160,7 @@ def test_get_stream():
         0,
         0,
     ]
-    assert get_stream(BOSKA_9, "low") == [
+    assert get_stream(BOSKA_9, "low").tolist() == [
         1,
         1,
         0,
@@ -177,66 +177,66 @@ def test_get_stream():
         1,
         0,
         0,
-    ]
-
-    assert get_stream(BOSKA_3, "mid") == [
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-    ]
-    assert get_stream(BOSKA_8, "mid") == [
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1,
-    ]
-    assert get_stream(BOSKA_9, "mid") == [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        1,
-        1,
-        0,
-        1,
-        1,
-        0,
-        1,
-        1,
     ]
 
-    assert get_stream(BOSKA_3, "hi") == [1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0]
-    assert get_stream(BOSKA_8, "hi") == [1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0]
-    assert get_stream(BOSKA_9, "hi") == [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1]
+    assert get_stream(BOSKA_3, "mid").tolist() == [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+    ]
+    assert get_stream(BOSKA_8, "mid").tolist() == [
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+    ]
+    assert get_stream(BOSKA_9, "mid").tolist() == [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+    ]
+
+    assert get_stream(BOSKA_3, "hi").tolist() == [1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0]
+    assert get_stream(BOSKA_8, "hi").tolist() == [1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0]
+    assert get_stream(BOSKA_9, "hi").tolist() == [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1]
 
 
 def test_noi():

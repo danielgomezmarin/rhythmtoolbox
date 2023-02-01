@@ -113,9 +113,14 @@ def balance(patt):
 
 
 def get_stream(roll, band="low"):
-    # monophonic onset pattern of instruments in the given frequency band: low, mid, or hi
-    stream = []
+    """Returns a monophonic onset pattern of instruments in the given frequency band:
 
+    roll, np.array
+        Piano roll
+
+    band, str
+        "low", "mid", or "hi"
+    """
     range_map = {
         "low": low_instruments,
         "mid": mid_instruments,
@@ -123,12 +128,9 @@ def get_stream(roll, band="low"):
     }
 
     if band not in range_map:
-        raise ValueError(f"Invalid range `{band}`. Must be low, mid, or hi")
+        raise ValueError(f"Invalid band `{band}`. Must be low, mid, or hi")
 
-    for event in roll:
-        stream.append(1 if event[range_map[band]].sum() > 0 else 0)
-
-    return stream
+    return ((roll[:, range_map[band]]).sum(axis=1) > 0).astype(int)
 
 
 def noi(roll):
