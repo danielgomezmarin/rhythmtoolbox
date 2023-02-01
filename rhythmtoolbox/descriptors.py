@@ -112,8 +112,8 @@ def balance(patt):
 # Polyphonic descriptors
 
 
-def get_stream(roll, range="low"):
-    # monophonic onset pattern of instruments in the given frequency range: low, mid, or hi
+def get_stream(roll, band="low"):
+    # monophonic onset pattern of instruments in the given frequency band: low, mid, or hi
     stream = []
 
     range_map = {
@@ -122,11 +122,11 @@ def get_stream(roll, range="low"):
         "hi": hi_instruments,
     }
 
-    if range not in range_map:
-        raise ValueError(f"Invalid range `{range}`. Must be low, mid, or hi")
+    if band not in range_map:
+        raise ValueError(f"Invalid range `{band}`. Must be low, mid, or hi")
 
     for event in roll:
-        stream.append(1 if event[range_map[range]].sum() > 0 else 0)
+        stream.append(1 if event[range_map[band]].sum() > 0 else 0)
 
     return stream
 
@@ -138,17 +138,17 @@ def noi(roll):
 
 def lowD(roll):
     # density in the low frequency range
-    return sum(get_stream(roll, range="low"))
+    return sum(get_stream(roll, band="low"))
 
 
 def midD(roll):
     # density in the mid frequency range
-    return sum(get_stream(roll, range="mid"))
+    return sum(get_stream(roll, band="mid"))
 
 
 def hiD(roll):
     # density in the hi frequency range
-    return sum(get_stream(roll, range="hi"))
+    return sum(get_stream(roll, band="hi"))
 
 
 def stepD(roll):
@@ -176,17 +176,17 @@ def hiness(roll):
 
 def lowsync(roll):
     # syncopation value of the low-frequency stream
-    return syncopation16(get_stream(roll, range="low"))
+    return syncopation16(get_stream(roll, band="low"))
 
 
 def midsync(roll):
     # syncopation value of the mid-frequency stream
-    return syncopation16(get_stream(roll, range="mid"))
+    return syncopation16(get_stream(roll, band="mid"))
 
 
 def hisync(roll):
     # syncopation value of the high-frequency stream
-    return syncopation16(get_stream(roll, range="hi"))
+    return syncopation16(get_stream(roll, band="hi"))
 
 
 def lowsyness(roll):
@@ -226,9 +226,9 @@ def polysync(roll):
 
     # find pairs of N and Ndi notes events
     for i in range(n):
-        lowstream_ = get_stream(roll, range="low")
-        midstream_ = get_stream(roll, range="mid")
-        histream_ = get_stream(roll, range="hi")
+        lowstream_ = get_stream(roll, band="low")
+        midstream_ = get_stream(roll, band="mid")
+        histream_ = get_stream(roll, band="hi")
 
         # describe the instruments present in current and nex steps
         event = [lowstream_[i], midstream_[i], histream_[i]]
@@ -290,9 +290,9 @@ def polysync(roll):
 def polyevenness(roll):
     # compute the polyphonic evenness
     # adapted from [7]
-    lowstream_ = get_stream(roll, range="low")
-    midstream_ = get_stream(roll, range="mid")
-    histream_ = get_stream(roll, range="hi")
+    lowstream_ = get_stream(roll, band="low")
+    midstream_ = get_stream(roll, band="mid")
+    histream_ = get_stream(roll, band="hi")
 
     low_evenness = evenness(lowstream_)
     mid_evenness = evenness(midstream_)
@@ -306,9 +306,9 @@ def polyevenness(roll):
 def polybalance(roll):
     # compute the polyphonic balance
     # adapted from [7]
-    lowstream_ = get_stream(roll, range="low")
-    midstream_ = get_stream(roll, range="mid")
-    histream_ = get_stream(roll, range="hi")
+    lowstream_ = get_stream(roll, band="low")
+    midstream_ = get_stream(roll, band="mid")
+    histream_ = get_stream(roll, band="hi")
 
     d = density(lowstream_) * 3 + density(midstream_) * 2 + density(histream_)
     if d == 0:
