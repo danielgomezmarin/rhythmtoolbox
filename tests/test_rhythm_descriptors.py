@@ -1,4 +1,8 @@
-from rhythmtoolbox import pattlist_to_pianoroll, pattlist2descriptors
+from rhythmtoolbox import (
+    pattlist_to_pianoroll,
+    pattlist2descriptors,
+    pianoroll2descriptors,
+)
 from rhythmtoolbox.descriptors import (
     density,
     syncopation16,
@@ -344,6 +348,9 @@ def test_polyD():
 
 
 def test_pattlist2descriptors():
+    assert list(pattlist2descriptors(BOSKA_3_PATTLIST).values()) == list(
+        pianoroll2descriptors(BOSKA_3).values()
+    )
     assert list(pattlist2descriptors(BOSKA_3_PATTLIST).values()) == [
         5,
         4,
@@ -364,6 +371,10 @@ def test_pattlist2descriptors():
         5.2753683906977775,
         0.9618538544571633,
     ]
+
+    assert list(pattlist2descriptors(BOSKA_8_PATTLIST).values()) == list(
+        pianoroll2descriptors(BOSKA_8).values()
+    )
     assert list(pattlist2descriptors(BOSKA_8_PATTLIST).values()) == [
         4,
         6,
@@ -384,6 +395,10 @@ def test_pattlist2descriptors():
         4.428794764473658,
         0.9961791398488665,
     ]
+
+    assert list(pattlist2descriptors(BOSKA_9_PATTLIST).values()) == list(
+        pianoroll2descriptors(BOSKA_9).values()
+    )
     assert list(pattlist2descriptors(BOSKA_9_PATTLIST).values()) == [
         6,
         8,

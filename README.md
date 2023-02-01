@@ -10,6 +10,8 @@ To go to the initial version of the repo (Nov 2018), checkout commit `6acdb69a60
 
 Install this package from source using `pip install git+https://github.com/danielgomezmarin/rhythmtoolbox`.
 
+#### Anaylze a pattern list
+
 ```python
 from rhythmtoolbox import pattlist2descriptors
 
@@ -33,6 +35,21 @@ pattlist = [
 ]
 
 pattlist2descriptors(pattlist)
+```
+
+#### Analyze a MIDI file
+
+This example analyzes a single-track (type 1) MIDI file or the first track in a multi-track (type 0) midi file.
+
+```python
+import pypianoroll
+from rhythmtoolbox import pianoroll2descriptors
+
+# 16th-note resolution
+multitrack = pypianoroll.read('assets/midi/boska/3.mid', resolution=4)
+roll = multitrack[0].pianoroll
+
+pianoroll2descriptors(roll)
 ```
 
 ## Attribution
