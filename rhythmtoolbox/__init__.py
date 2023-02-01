@@ -22,6 +22,13 @@ from .descriptors import (
 )
 
 
+def pattlist_to_pianoroll(pattlist):
+    roll = np.zeros((len(pattlist), 128))
+    for i in range(len(roll)):
+        roll[i][pattlist[i]] = 1
+    return roll
+
+
 def pattlist2descriptors(pattlist):
     """Compute all descriptors from a pattern list representation of a polyphonic drum pattern.
 
@@ -55,17 +62,19 @@ def pattlist2descriptors(pattlist):
         "polybalance": polybalance,
     }
 
+    roll = pattlist_to_pianoroll(pattlist)
+
     result = {}
     for key, func in descriptors.items():
-        result[key] = func(pattlist)
+        result[key] = func(roll)
 
     for key, func in sixteen_step_descriptors.items():
         result[key] = None
-        if len(pattlist) % 16 == 0:
+        if len(roll) % 16 == 0:
             # Compute the descriptors for each 16-step subpattern
             vals = []
-            for i in range(len(pattlist) - 16 + 1):
-                vals.append(func(pattlist[i : i + 16]))
+            for i in range(len(roll) - 16 + 1):
+                vals.append(func(roll[i : i + 16]))
             result[key] = np.mean(vals)
 
     return result

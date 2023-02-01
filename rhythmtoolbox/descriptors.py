@@ -112,14 +112,7 @@ def balance(patt):
 # Polyphonic descriptors
 
 
-def pattlist_to_pianoroll(pattlist):
-    roll = np.zeros((len(pattlist), 128))
-    for i in range(len(roll)):
-        roll[i][pattlist[i]] = 1
-    return roll
-
-
-def get_stream(pattlist, range="low"):
+def get_stream(roll, range="low"):
     # monophonic onset pattern of instruments in the given frequency range: low, mid, or hi
     stream = []
 
@@ -132,90 +125,89 @@ def get_stream(pattlist, range="low"):
     if range not in range_map:
         raise ValueError(f"Invalid range `{range}`. Must be low, mid, or hi")
 
-    roll = pattlist_to_pianoroll(pattlist)
     for event in roll:
         stream.append(1 if event[range_map[range]].sum() > 0 else 0)
 
     return stream
 
 
-def noi(pattlist):
+def noi(roll):
     # number of different instruments in a pattern
-    return len(set([i for s in pattlist for i in s]))
+    return len(list(filter(lambda x: x.sum() > 0, roll.T)))
 
 
-def lowD(pattlist):
+def lowD(roll):
     # density in the low frequency range
-    return sum(get_stream(pattlist, range="low"))
+    return sum(get_stream(roll, range="low"))
 
 
-def midD(pattlist):
+def midD(roll):
     # density in the mid frequency range
-    return sum(get_stream(pattlist, range="mid"))
+    return sum(get_stream(roll, range="mid"))
 
 
-def hiD(pattlist):
+def hiD(roll):
     # density in the hi frequency range
-    return sum(get_stream(pattlist, range="hi"))
+    return sum(get_stream(roll, range="hi"))
 
 
-def stepD(pattlist):
+def stepD(roll):
     # percentage of steps that have onsets
-    return sum([1 for x in pattlist if x]) / len(pattlist)
+    return sum([1 for x in roll if x.sum() > 0]) / len(roll)
 
 
-def lowness(pattlist):
+def lowness(roll):
     # number of onsets in the low freq stream divided by the number of steps that have onsets
-    n = sum([1 for x in pattlist if x])
-    return lowD(pattlist) / n if n else 0
+    n = sum([1 for x in roll if x.sum() > 0])
+    return lowD(roll) / n if n else 0
 
 
-def midness(pattlist):
+def midness(roll):
     # number of onsets in the mid freq stream divided by the number of steps that have onsets
-    n = sum([1 for x in pattlist if x])
-    return midD(pattlist) / n if n else 0
+    n = sum([1 for x in roll if x.sum() > 0])
+    return midD(roll) / n if n else 0
 
 
-def hiness(pattlist):
+def hiness(roll):
     # number of onsets in the hi freq stream divided by the number of steps that have onsets
-    n = sum([1 for x in pattlist if x])
-    return hiD(pattlist) / n if n else 0
+    n = sum([1 for x in roll if x.sum() > 0])
+    return hiD(roll) / n if n else 0
 
 
-def lowsync(pattlist):
+def lowsync(roll):
     # syncopation value of the low-frequency stream
-    return syncopation16(get_stream(pattlist, range="low"))
+    return syncopation16(get_stream(roll, range="low"))
 
 
-def midsync(pattlist):
+def midsync(roll):
     # syncopation value of the mid-frequency stream
-    return syncopation16(get_stream(pattlist, range="mid"))
+    return syncopation16(get_stream(roll, range="mid"))
 
 
-def hisync(pattlist):
+def hisync(roll):
     # syncopation value of the high-frequency stream
-    return syncopation16(get_stream(pattlist, range="hi"))
+    return syncopation16(get_stream(roll, range="hi"))
 
 
-def lowsyness(pattlist):
+def lowsyness(roll):
     # stream syncopation divided by the number of onsets of the stream
-    d = lowD(pattlist)
-    return lowsync(pattlist) / d if d else 0
+    d = lowD(roll)
+    return lowsync(roll) / d if d else 0
 
 
-def midsyness(pattlist):
+def midsyness(roll):
     # stream syncopation divided by the number of onsets of the stream
-    d = midD(pattlist)
-    return midsync(pattlist) / d if d else 0
+    d = midD(roll)
+    return midsync(roll) / d if d else 0
 
 
-def hisyness(pattlist):
+def hisyness(roll):
     # stream syncopation divided by the number of onsets of the stream
-    d = hiD(pattlist)
-    return hisync(pattlist) / d if d else 0
+    d = hiD(roll)
+    return hisync(roll) / d if d else 0
 
 
-def polysync(pattlist):
+def polysync(roll):
     # polyphonic syncopation as described in [8]
     # If N is a note that precedes a rest, R,
     # and R has a metric weight greater than or equal to N,
@@ -229,24 +221,26 @@ def polysync(pattlist):
     salience_w = [0, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3]
     syncopation_list = []
 
-    # find pairs of N and Ndi notes events in the polyphonic pattlist
-    for i in range(len(pattlist)):
+    # number of time steps
+    n = len(roll)
 
-        lowstream_ = get_stream(pattlist, range="low")
-        midstream_ = get_stream(pattlist, range="mid")
-        histream_ = get_stream(pattlist, range="hi")
+    # find pairs of N and Ndi notes events
+    for i in range(n):
+        lowstream_ = get_stream(roll, range="low")
+        midstream_ = get_stream(roll, range="mid")
+        histream_ = get_stream(roll, range="hi")
 
         # describe the instruments present in current and nex steps
         event = [lowstream_[i], midstream_[i], histream_[i]]
         event_next = [
-            lowstream_[(i + 1) % len(pattlist)],
-            midstream_[(i + 1) % len(pattlist)],
-            histream_[(i + 1) % len(pattlist)],
+            lowstream_[(i + 1) % n],
+            midstream_[(i + 1) % n],
+            histream_[(i + 1) % n],
         ]
         local_syncopation = 0
 
         # syncopation: events are different, and next one has greater or equal metric weight
-        if event != event_next and salience_w[(i + 1) % len(pattlist)] >= salience_w[i]:
+        if event != event_next and salience_w[(i + 1) % n] >= salience_w[i]:
             # only process if there is a syncopation
             # now analyze what type of syncopation is found to assign instrumental weight
             # instrumental weight depends on the relationship between the instruments in the pair:
@@ -256,16 +250,14 @@ def polysync(pattlist):
             if event[0] == 1 and event_next[1] == 1 and event_next[2] == 1:
                 instrumental_weight = 2
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % len(pattlist)])
-                    + instrumental_weight
+                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             # Mid against low and high mid against low and hi
             if event[1] == 1 and event_next[0] == 1 and event_next[2] == 1:
                 instrumental_weight = 1
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % len(pattlist)])
-                    + instrumental_weight
+                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             # Two-stream syncopation
@@ -273,24 +265,21 @@ def polysync(pattlist):
             if (event[0] == 1 or event[1] == 1) and event_next == [0, 0, 1]:
                 instrumental_weight = 5
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % len(pattlist)])
-                    + instrumental_weight
+                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             # Low against mid (ATTENTION: not defined in [8])
             if event == [1, 0, 0] and event_next == [0, 1, 0]:
                 instrumental_weight = 2
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % len(pattlist)])
-                    + instrumental_weight
+                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             # Mid against low (ATTENTION: not defined in [8])
             if event == [0, 1, 0] and event_next == [1, 0, 0]:
                 instrumental_weight = 2
                 local_syncopation = (
-                    abs(salience_w[i] - salience_w[(i + 1) % len(pattlist)])
-                    + instrumental_weight
+                    abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
                 )
 
             syncopation_list.append(local_syncopation)
@@ -298,12 +287,12 @@ def polysync(pattlist):
     return sum(syncopation_list)
 
 
-def polyevenness(pattlist):
-    # compute the polyphonic evenness of a pattlist
+def polyevenness(roll):
+    # compute the polyphonic evenness
     # adapted from [7]
-    lowstream_ = get_stream(pattlist, range="low")
-    midstream_ = get_stream(pattlist, range="mid")
-    histream_ = get_stream(pattlist, range="hi")
+    lowstream_ = get_stream(roll, range="low")
+    midstream_ = get_stream(roll, range="mid")
+    histream_ = get_stream(roll, range="hi")
 
     low_evenness = evenness(lowstream_)
     mid_evenness = evenness(midstream_)
@@ -314,12 +303,12 @@ def polyevenness(pattlist):
     return polyevenness
 
 
-def polybalance(pattlist):
-    # compute the polyphonic balance of a pattlist
+def polybalance(roll):
+    # compute the polyphonic balance
     # adapted from [7]
-    lowstream_ = get_stream(pattlist, range="low")
-    midstream_ = get_stream(pattlist, range="mid")
-    histream_ = get_stream(pattlist, range="hi")
+    lowstream_ = get_stream(roll, range="low")
+    midstream_ = get_stream(roll, range="mid")
+    histream_ = get_stream(roll, range="hi")
 
     d = density(lowstream_) * 3 + density(midstream_) * 2 + density(histream_)
     if d == 0:
@@ -350,6 +339,6 @@ def polybalance(pattlist):
     return 1 - magnitude
 
 
-def polyD(pattlist):
+def polyD(roll):
     # compute the total number of onsets
-    return lowD(pattlist) + midD(pattlist) + hiD(pattlist)
+    return lowD(roll) + midD(roll) + hiD(roll)

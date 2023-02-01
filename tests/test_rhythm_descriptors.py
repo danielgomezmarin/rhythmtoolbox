@@ -1,4 +1,4 @@
-from rhythmtoolbox import pattlist2descriptors
+from rhythmtoolbox import pattlist_to_pianoroll, pattlist2descriptors
 from rhythmtoolbox.descriptors import (
     density,
     syncopation16,
@@ -33,7 +33,7 @@ from rhythmtoolbox.midi_mapping import (
 PATT_1 = [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0]
 PATT_2 = [1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0]
 
-BOSKA_3 = [
+BOSKA_3_PATTLIST = [
     [36, 38, 42],
     [],
     [],
@@ -51,8 +51,9 @@ BOSKA_3 = [
     [42, 64],
     [],
 ]
+BOSKA_3 = pattlist_to_pianoroll(BOSKA_3_PATTLIST)
 
-BOSKA_8 = [
+BOSKA_8_PATTLIST = [
     [38, 39, 46],
     [38, 39, 46],
     [38, 39, 46],
@@ -70,8 +71,9 @@ BOSKA_8 = [
     [39, 46],
     [38],
 ]
+BOSKA_8 = pattlist_to_pianoroll(BOSKA_8_PATTLIST)
 
-BOSKA_9 = [
+BOSKA_9_PATTLIST = [
     [36, 42],
     [36],
     [42],
@@ -89,6 +91,7 @@ BOSKA_9 = [
     [37, 38, 39, 42, 46],
     [38, 46],
 ]
+BOSKA_9 = pattlist_to_pianoroll(BOSKA_9_PATTLIST)
 
 
 def test_density():
@@ -341,7 +344,7 @@ def test_polyD():
 
 
 def test_pattlist2descriptors():
-    assert list(pattlist2descriptors(BOSKA_3).values()) == [
+    assert list(pattlist2descriptors(BOSKA_3_PATTLIST).values()) == [
         5,
         4,
         5,
@@ -361,7 +364,7 @@ def test_pattlist2descriptors():
         5.2753683906977775,
         0.9618538544571633,
     ]
-    assert list(pattlist2descriptors(BOSKA_8).values()) == [
+    assert list(pattlist2descriptors(BOSKA_8_PATTLIST).values()) == [
         4,
         6,
         10,
@@ -381,7 +384,7 @@ def test_pattlist2descriptors():
         4.428794764473658,
         0.9961791398488665,
     ]
-    assert list(pattlist2descriptors(BOSKA_9).values()) == [
+    assert list(pattlist2descriptors(BOSKA_9_PATTLIST).values()) == [
         6,
         8,
         7,
