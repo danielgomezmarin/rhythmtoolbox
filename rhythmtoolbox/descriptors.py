@@ -17,27 +17,29 @@ import math
 
 import numpy as np
 
-from .midi_mapping import hi_instruments, low_instruments, mid_instruments
-
-
 # Monophonic descriptors
 
 
-def density(patt):
-    # count the onsets in a pattern
-    return sum([x for x in patt if x == 1])
-
-
 def syncopation16(patt):
-    # input a monophonic pattern as a list of 0s and 1s (1s indicating an onset)
-    # and obtain its syncopation value
+    """Compute the syncopation value of a 16-step pattern
+
+    patt, list
+        a monophonic pattern as a list of 0s and 1s (1s indicating an onset)
+    """
+
+    if isinstance(patt, np.ndarray):
+        patt = patt.tolist()
+
     synclist = [0] * 16
     salience_lhl = [5, 1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1]
-    for s, step in enumerate(patt):
+
+    n_steps = len(patt)
+    for ix in range(n_steps):
+        next_ix = (ix + 1) % n_steps
         # look for an onset preceding a silence
-        if patt[s] == 1 and patt[(s + 1) % len(patt)] == 0:
+        if patt[ix] == 1 and patt[next_ix] == 0:
             # compute syncopation
-            synclist[s] = salience_lhl[(s + 1) % len(patt)] - salience_lhl[s]
+            synclist[ix] = salience_lhl[next_ix] - salience_lhl[ix]
 
     return sum(synclist)
 
@@ -49,11 +51,13 @@ def syncopation16_awareness(patt):
     synclist = [0] * 16
     salience = [5, 1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1]
     awareness = [5, 1, 4, 2]
-    for s, step in enumerate(patt):
+    n_steps = len(patt)
+    for ix in range(n_steps):
+        next_ix = (ix + 1) % n_steps
         # look for an onset and a silence following
-        if patt[s] == 1 and patt[(s + 1) % 16] == 0:
+        if patt[ix] == 1 and patt[next_ix] == 0:
             # compute syncopation
-            synclist[s] = salience[(s + 1) % 16] - salience[s]
+            synclist[ix] = salience[next_ix] - salience[ix]
 
     # apply awareness
     sync_and_awareness = [
@@ -113,110 +117,51 @@ def balance(patt):
 # Polyphonic descriptors
 
 
-def get_stream(roll, band="low"):
-    """Returns a monophonic onset pattern of instruments in the given frequency band.
-
-    roll, np.array
-        Piano roll
-
-    band, str
-        "low", "mid", or "hi"
-    """
-    range_map = {
-        "low": low_instruments,
-        "mid": mid_instruments,
-        "hi": hi_instruments,
-    }
-
-    if band not in range_map:
-        raise ValueError(f"Invalid band `{band}`. Must be low, mid, or hi")
-
-    return ((roll[:, range_map[band]]).sum(axis=1) > 0).astype(int)
-
-
 def noi(roll):
-    # number of different instruments in a pattern
+    """Returns the number of instruments used in the roll"""
     return len(list(filter(lambda x: x.sum() > 0, roll.T)))
 
 
-def lowD(roll):
-    # density in the low frequency range
-    return sum(get_stream(roll, band="low"))
+def density(pattern):
+    """Computes the density of the pattern."""
+    return sum(pattern)
 
 
-def midD(roll):
-    # density in the mid frequency range
-    return sum(get_stream(roll, band="mid"))
-
-
-def hiD(roll):
-    # density in the hi frequency range
-    return sum(get_stream(roll, band="hi"))
+def get_n_onset_steps(roll):
+    """Returns the number of steps with onsets"""
+    return ((roll).sum(axis=1) > 0).sum()
 
 
 def stepD(roll):
-    # percentage of steps that have onsets
-    return sum([1 for x in roll if x.sum() > 0]) / len(roll)
+    """Returns the percentage of steps with onsets"""
+    return get_n_onset_steps(roll) / len(roll)
 
 
-def lowness(roll):
-    # number of onsets in the low freq stream divided by the number of steps that have onsets
-    n = sum([1 for x in roll if x.sum() > 0])
-    return lowD(roll) / n if n else 0
+def bandness(pattern, n_onset_steps):
+    """Computes a measure of how concentrated the pattern is in the given frequency band.
+
+    pattern, list
+        The pattern of the band of interest.
+
+    n_onset_steps, int
+        The number of steps with onsets of the entire roll.
+    """
+    return density(pattern) / n_onset_steps if n_onset_steps else 0
 
 
-def midness(roll):
-    # number of onsets in the mid freq stream divided by the number of steps that have onsets
-    n = sum([1 for x in roll if x.sum() > 0])
-    return midD(roll) / n if n else 0
+def syness(pattern):
+    """Returns the syncopation of the pattern divided by the number of onsets in the pattern"""
+    d = density(pattern)
+    return syncopation16(pattern) / d if d else 0
 
 
-def hiness(roll):
-    # number of onsets in the hi freq stream divided by the number of steps that have onsets
-    n = sum([1 for x in roll if x.sum() > 0])
-    return hiD(roll) / n if n else 0
-
-
-def lowsync(roll):
-    # syncopation value of the low-frequency stream
-    return syncopation16(get_stream(roll, band="low"))
-
-
-def midsync(roll):
-    # syncopation value of the mid-frequency stream
-    return syncopation16(get_stream(roll, band="mid"))
-
-
-def hisync(roll):
-    # syncopation value of the high-frequency stream
-    return syncopation16(get_stream(roll, band="hi"))
-
-
-def lowsyness(roll):
-    # stream syncopation divided by the number of onsets of the stream
-    d = lowD(roll)
-    return lowsync(roll) / d if d else 0
-
-
-def midsyness(roll):
-    # stream syncopation divided by the number of onsets of the stream
-    d = midD(roll)
-    return midsync(roll) / d if d else 0
-
-
-def hisyness(roll):
-    # stream syncopation divided by the number of onsets of the stream
-    d = hiD(roll)
-    return hisync(roll) / d if d else 0
-
-
-def polysync(roll):
+def polysync(lowstream, midstream, histream):
     """Computes the polyphonic syncopation of a rhythm, as described in [8].
 
-     If N is a note that precedes a rest R, and R has a metric weight greater than or equal to N, then the pair (N, R)
-     is said to constitute a monophonic syncopation. If N is a note on a certain instrument that precedes a note on a
-     different instrument (Ndi), and Ndi has a metric weight greater than or equal to N, then the pair (N, Ndi) is said
-     to constitute a polyphonic syncopation.
+    If N is a note that precedes a rest R, and R has a metric weight greater than or equal to N, then the pair (N, R)
+    is said to constitute a monophonic syncopation. If N is a note on a certain instrument that precedes a note on a
+    different instrument (Ndi), and Ndi has a metric weight greater than or equal to N, then the pair (N, Ndi) is said
+    to constitute a polyphonic syncopation.
     """
 
     # metric profile as described by witek
@@ -224,114 +169,91 @@ def polysync(roll):
     syncopation_list = []
 
     # number of time steps
-    n = len(roll)
-
-    # Get the onset pattern of each instrument band
-    lowstream_ = get_stream(roll, band="low")
-    midstream_ = get_stream(roll, band="mid")
-    histream_ = get_stream(roll, band="hi")
+    n = len(lowstream)
 
     # find pairs of N and Ndi notes events
-    for i in range(n):
-        # describe the instruments present in current and nex steps
-        event = [lowstream_[i], midstream_[i], histream_[i]]
-        event_next = [
-            lowstream_[(i + 1) % n],
-            midstream_[(i + 1) % n],
-            histream_[(i + 1) % n],
-        ]
-        local_syncopation = 0
+    for ix in range(n):
+        # describe the instruments present in current and next steps
+        event = [lowstream[ix], midstream[ix], histream[ix]]
 
-        # syncopation: events are different, and next one has greater or equal metric weight
-        if event != event_next and salience_w[(i + 1) % n] >= salience_w[i]:
+        next_ix = (ix + 1) % n
+        event_next = [
+            lowstream[next_ix],
+            midstream[next_ix],
+            histream[next_ix],
+        ]
+
+        # syncopation occurs when adjacent events are different, and succeeding event has greater or equal metric weight
+        if event != event_next and salience_w[next_ix] >= salience_w[ix]:
             # only process if there is a syncopation
-            # now analyze what type of syncopation is found to assign instrumental weight
-            # instrumental weight depends on the relationship between the instruments in the pair:
+            # analyze what type of syncopation is found to assign instrumental weight
+            # instrumental weight depends on the relationship between the instruments in the pair
+
+            instrumental_weight = None
 
             # Three-stream syncopation
             # Low against mid and hi
             if event[0] == 1 and event_next[1] == 1 and event_next[2] == 1:
                 instrumental_weight = 2
-                local_syncopation = (
-                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
-                )
 
-            # Mid against low and high mid against low and hi
+            # Mid against low and high
             if event[1] == 1 and event_next[0] == 1 and event_next[2] == 1:
                 instrumental_weight = 1
-                local_syncopation = (
-                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
-                )
 
             # Two-stream syncopation
             # Low or mid against high
             if (event[0] == 1 or event[1] == 1) and event_next == [0, 0, 1]:
                 instrumental_weight = 5
-                local_syncopation = (
-                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
-                )
 
             # Low against mid (ATTENTION: not defined in [8])
             if event == [1, 0, 0] and event_next == [0, 1, 0]:
                 instrumental_weight = 2
-                local_syncopation = (
-                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
-                )
 
             # Mid against low (ATTENTION: not defined in [8])
             if event == [0, 1, 0] and event_next == [1, 0, 0]:
                 instrumental_weight = 2
-                local_syncopation = (
-                        abs(salience_w[i] - salience_w[(i + 1) % n]) + instrumental_weight
-                )
 
+            local_syncopation = 0
+            if instrumental_weight:
+                local_syncopation = (
+                    abs(salience_w[ix] - salience_w[next_ix]) + instrumental_weight
+                )
             syncopation_list.append(local_syncopation)
 
     return sum(syncopation_list)
 
 
-def polyevenness(roll):
-    # compute the polyphonic evenness
-    # adapted from [7]
-    lowstream_ = get_stream(roll, band="low")
-    midstream_ = get_stream(roll, band="mid")
-    histream_ = get_stream(roll, band="hi")
+def polyevenness(lowstream, midstream, histream):
+    """Compute the polyphonic evenness. Adapted from [7]"""
+    low_evenness = evenness(lowstream)
+    mid_evenness = evenness(midstream)
+    hi_evenness = evenness(histream)
 
-    low_evenness = evenness(lowstream_)
-    mid_evenness = evenness(midstream_)
-    hi_evenness = evenness(histream_)
-
-    polyevenness = low_evenness * 3 + mid_evenness * 2 + hi_evenness
-
-    return polyevenness
+    return low_evenness * 3 + mid_evenness * 2 + hi_evenness
 
 
-def polybalance(roll):
-    # compute the polyphonic balance
-    # adapted from [7]
-    lowstream_ = get_stream(roll, band="low")
-    midstream_ = get_stream(roll, band="mid")
-    histream_ = get_stream(roll, band="hi")
+def polybalance(lowstream, midstream, histream):
+    """Compute the polyphonic balance of a rhythm. Adapted from [7]"""
 
-    d = density(lowstream_) * 3 + density(midstream_) * 2 + density(histream_)
+    d = density(lowstream) * 3 + density(midstream) * 2 + density(histream)
     if d == 0:
         return 1
 
     center = np.array([0, 0])
     iso_angle_16 = 2 * math.pi / 16
 
-    Xlow = [3 * math.cos(i * iso_angle_16) for i, x in enumerate(lowstream_) if x == 1]
-    Ylow = [3 * math.sin(i * iso_angle_16) for i, x in enumerate(lowstream_) if x == 1]
+    Xlow = [3 * math.cos(i * iso_angle_16) for i, x in enumerate(lowstream) if x == 1]
+    Ylow = [3 * math.sin(i * iso_angle_16) for i, x in enumerate(lowstream) if x == 1]
     matrixlow = np.array([Xlow, Ylow])
     matrixlowsum = matrixlow.sum(axis=1)
 
-    Xmid = [2 * math.cos(i * iso_angle_16) for i, x in enumerate(midstream_) if x == 1]
-    Ymid = [2 * math.sin(i * iso_angle_16) for i, x in enumerate(midstream_) if x == 1]
+    Xmid = [2 * math.cos(i * iso_angle_16) for i, x in enumerate(midstream) if x == 1]
+    Ymid = [2 * math.sin(i * iso_angle_16) for i, x in enumerate(midstream) if x == 1]
     matrixmid = np.array([Xmid, Ymid])
     matrixmidsum = matrixmid.sum(axis=1)
 
-    Xhi = [2 * math.cos(i * iso_angle_16) for i, x in enumerate(histream_) if x == 1]
-    Yhi = [2 * math.sin(i * iso_angle_16) for i, x in enumerate(histream_) if x == 1]
+    Xhi = [2 * math.cos(i * iso_angle_16) for i, x in enumerate(histream) if x == 1]
+    Yhi = [2 * math.sin(i * iso_angle_16) for i, x in enumerate(histream) if x == 1]
     matrixhi = np.array([Xhi, Yhi])
     matrixhisum = matrixhi.sum(axis=1)
 
@@ -342,6 +264,6 @@ def polybalance(roll):
     return 1 - magnitude
 
 
-def polyD(roll):
+def polyD(lowstream, midstream, histream):
     # compute the total number of onsets
-    return lowD(roll) + midD(roll) + hiD(roll)
+    return density(lowstream) + density(midstream) + density(histream)
