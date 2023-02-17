@@ -87,9 +87,39 @@ GM_dict = {
 }
 
 
+def get_band(roll, band="low"):
+    """Returns a monophonic onset pattern of instruments in the given frequency band.
+
+    roll, np.array
+        Piano roll
+
+    band, str
+        "low", "mid", or "hi"
+    """
+    range_map = {
+        "low": low_instruments,
+        "mid": mid_instruments,
+        "hi": hi_instruments,
+    }
+
+    if band not in range_map:
+        raise ValueError(f"Invalid band `{band}`. Must be low, mid, or hi")
+
+    return (roll[:, range_map[band]].sum(axis=1) > 0).astype(int)
+
+
+def get_bands(roll):
+    """Parses the low, mid, and high frequency bands of a piano roll"""
+    return (
+        get_band(roll, band="low"),
+        get_band(roll, band="mid"),
+        get_band(roll, band="hi"),
+    )
+
+
 def event_to_8number(midi_notes):
     # input an event list and output a representation
-    # in 8 instrumental streams:
+    # in 8 instrumental band:
     # kick, snare, rimshot, clap, closed hihat, open hihat, low tom, high tom
     output = []
     # make sure the event has notes
@@ -109,7 +139,7 @@ def event_to_8number(midi_notes):
 
 def event_to_3number(midi_notes):
     # input an event list and output a representation
-    # in 3 instrumental streams:
+    # in 3 instrumental band:
     # low, mid, high
     output = []
     # make sure the event has notes
