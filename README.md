@@ -1,16 +1,53 @@
 # Rhythm Toolbox
 
-This repository contains tools for studying rhythms in symbolic format, implements various descriptors for both
-monophonic and polyphonic patterns. It is tailored to the analysis of polyphonic drum patterns but can be adapted for
-other types of patterns. The descriptors are derived from scientific papers which are cited in the source.
+This repository contains tools for studying rhythms in symbolic format. It was developed for the study of polyphonic
+drum patterns, but can be adapted for other types of patterns. It implements various descriptors derived from scientific
+papers for both monophonic and polyphonic patterns. See the [Descriptors](#descriptors) section below for a full list
+with references.
 
-To go to the initial version of the repo (Nov 2018), checkout commit `6acdb69a60153d08`.
+To view the initial version of the toolbox (Nov 2018), checkout
+commit [`6acdb69a60153d08`](https://github.com/danielgomezmarin/rhythmtoolbox/tree/6acdb69a60153d0874da87560df3d7c62765e27a).
+
+## Installation
+
+```
+pip install git+https://github.com/danielgomezmarin/rhythmtoolbox
+```
 
 ## Usage
 
-Install this package from source using `pip install git+https://github.com/danielgomezmarin/rhythmtoolbox`.
+Rhythm Toolbox supports the multiple representations of symbolic rhythm.
 
-#### Anaylze a pattern list
+#### MIDI
+
+To compute descriptors from a MIDI file:
+
+```python
+from rhythmtoolbox import midifile2descriptors
+
+midifile2descriptors('assets/midi/boska/3.mid')
+```
+
+#### Piano roll
+
+A [piano roll](https://en.wikipedia.org/wiki/Piano_roll#In_digital_audio_workstations) is a `(N, V)` matrix, where `N`
+is a number of time steps and `V` is a number of MIDI pitches. Any positive value represents an onset; Rhythm Toolbox
+does not currently consider velocity.
+
+To compute descriptors from a piano roll:
+
+```python
+from rhythmtoolbox import pianoroll2descriptors
+
+pianoroll2descriptors(roll)
+```
+
+#### Pattern list
+
+A pattern list is a list of lists representing time steps, each containing the MIDI note numbers that occur at that
+step.
+
+To compute descriptors from a pattern list:
 
 ```python
 from rhythmtoolbox import pattlist2descriptors
@@ -33,28 +70,43 @@ pattlist = [
     [42, 64],
     [],
 ]
-
 pattlist2descriptors(pattlist)
 ```
 
-#### Analyze a MIDI file
+## Descriptors
 
-This example analyzes a single-track (type 1) MIDI file or the first track in a multi-track (type 0) midi file.
+The mapping of MIDI instruments to frequency bands can be found in [midi_mapping.py](./rhythmtoolbox/midi_mapping.py).
 
-```python
-import pypianoroll
-from rhythmtoolbox import pianoroll2descriptors
+| Name    | Description                            |
+|---------|----------------------------------------|
+| noi     | Number of instruments                  |
+| lowD    | Number of onsets in the low freq band  |
+| midD    | Number of onsets in the mid freq band  |
+| hiD     | Number of onsets in the high freq band |
+| stepD   | Percentage of steps with onsets        |
+| lowness | Concentration in the low freq band     |
+| midness | Concentration in the mid freq band     |
+| hiness  | Concentration in the high freq band    |
 
-# 16th-note resolution
-multitrack = pypianoroll.read('assets/midi/boska/3.mid', resolution=4)
-roll = multitrack[0].pianoroll
+The following descriptors are valid only for 16-step patterns:
 
-pianoroll2descriptors(roll)
-```
+| Name         | Description                                      | Reference                                                                |
+|--------------|--------------------------------------------------|--------------------------------------------------------------------------|
+| lowsync      | Syncopation of the low freq band                 |                                                                          |
+| midsync      | Syncopation of the mid instruments               |                                                                          |
+| hisync       | Syncopation of the high freq band                |                                                                          |
+| lowsyness    | Syncopation of the low freq band divided by lowD |                                                                          |
+| midsyness    | Syncopation of the mid freq band divided by midD |                                                                          |
+| hisyness     | Syncopation of the high freq band divided by hiD |                                                                          |
+| polybalance  | Polyphonic balance                               | [Milne and Herff, 2020](https://doi.org/10.1016/j.cognition.2020.104233) |
+| polyevenness | Polyphonic evenness                              | [Milne and Dean, 2016](https://doi.org/10.1162/COMJ_a_00343)             |
+| polysync     | Polyphonic syncopation                           | [Witek et al, 2014](https://doi.org/10.1371/journal.pone.0094446)        |
+| polyD        | Total number of onsets across all bands          |                                                                          |
 
 ## Attribution
 
-If this repository is useful for your research please cite [our paper](https://doi.org/10.1080/09298215.2020.1806887)
+If this repository is useful for your research please cite the
+following [paper](https://doi.org/10.1080/09298215.2020.1806887)
 via the BibTeX below.
 
     @article{gomez2020drum,

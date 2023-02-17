@@ -1,33 +1,33 @@
 """
-This module implements a variety of descriptors for polyphonic drum patterns from scientific research related to
-drum analysis and generation.
+This module implements various descriptors derived from scientific publications related to polyphonic drum pattern
+analysis and generation.
 
 References
 
-- [1] Gómez Marín, D. (2018). Similarity and style in electronic dance music drum rhythms (Doctoral dissertation,
+- Gómez Marín, D. (2018). Similarity and style in electronic dance music drum rhythms (Doctoral dissertation,
   Universitat Pompeu Fabra).
 
-- [2] Gómez-Marín, D., Jorda, S., & Herrera, P. (2016). Strictly Rhythm: Exploring the effects of identical regions and
+- Gómez-Marín, D., Jorda, S., & Herrera, P. (2016). Strictly Rhythm: Exploring the effects of identical regions and
   meter induction in rhythmic similarity perception. In Music, Mind, and Embodiment: 11th International Symposium, CMMR
   2015, Plymouth, UK, June 16-19, 2015, Revised Selected Papers 11 (pp. 449-463). Springer International Publishing.
 
-- [3] Gómez Marín, D., Jordà Puig, S., & Boyer, H. (2015). Pad and Sad: Two awareness-Weighted rhythmic similarity
+- Gómez Marín, D., Jordà Puig, S., & Boyer, H. (2015). Pad and Sad: Two awareness-Weighted rhythmic similarity
   distances. In Müller M, Wiering F, editors. Proceedings of the 16th International Society for Music Information
   Retrieval (ISMIR) Conference; 2015 Oct 26-30; Málaga, Spain. Canada: International Society for Music Information
   Retrieval; 2015.. International Society for Music Information Retrieval (ISMIR).
 
-- [4] Gómez-Marín, D., Jordà, S., & Herrera, P. (2020). Drum rhythm spaces: From polyphonic similarity to generative
-  maps. Journal of New Music Research, 49(5), 438-456.
+- Gómez-Marín, D., Jordà, S., & Herrera, P. (2020). Drum rhythm spaces: From polyphonic similarity to generative maps.
+  Journal of New Music Research, 49(5), 438-456.
 
-- [5] Haki, B., Nieto, M., Pelinski, T., & Jordà, S. Real-Time Drum Accompaniment Using Transformer Architecture.
+- Haki, B., Nieto, M., Pelinski, T., & Jordà, S. Real-Time Drum Accompaniment Using Transformer Architecture.
 
-- [6] Milne, A. J., & Dean, R. T. (2016). Computational creation and morphing of multilevel rhythms by control of
-  evenness. Computer Music Journal, 40(1), 35-53.
+- Milne, A. J., & Dean, R. T. (2016). Computational creation and morphing of multilevel rhythms by control of evenness
+  Computer Music Journal, 40(1), 35-53.
 
-- [7] Milne, A. J., & Herff, S. A. (2020). The perceptual relevance of balance, evenness, and entropy in musical
-  rhythms. Cognition, 203, 104233.
+- Milne, A. J., & Herff, S. A. (2020). The perceptual relevance of balance, evenness, and entropy in musical rhythms.
+  Cognition, 203, 104233.
 
-- [8] Witek, M. A., Clarke, E. F., Wallentin, M., Kringelbach, M. L., & Vuust, P. (2014). Syncopation, body-movement and
+- Witek, M. A., Clarke, E. F., Wallentin, M., Kringelbach, M. L., & Vuust, P. (2014). Syncopation, body-movement and
   pleasure in groove music. PloS one, 9(4), e94446.
 """
 
@@ -96,7 +96,7 @@ def evenness(patt):
     # i.e. if we have 4 onsets in a 16 step pattern, what is the distance of onsets
     # o1, o2, o3, o4 to positions 0 4 8 and 12
     # here we will use a simple algorithm that does not involve DFT computation
-    # evenness is well described in [6] but this implementation is much simpler
+    # evenness is well described in [Milne and Dean, 2016] but this implementation is much simpler
     d = density(patt)
     if d == 0:
         return 0
@@ -115,7 +115,7 @@ def evenness(patt):
 
 
 def balance(patt):
-    # balance is described in [7] as:
+    # balance is described in [Milne and Herff, 2020] as:
     # "a quantification of the proximity of that rhythm's
     # “centre of mass” (the mean position of the points)
     # to the centre of the unit circle."
@@ -137,7 +137,7 @@ def balance(patt):
 
 
 def noi(roll):
-    """Returns the number of instruments used in the roll"""
+    """Returns the number of instruments (noi) used in the roll"""
     return len(list(filter(lambda x: x.sum() > 0, roll.T)))
 
 
@@ -148,7 +148,7 @@ def density(pattern):
 
 def get_n_onset_steps(roll):
     """Returns the number of steps with onsets"""
-    return ((roll).sum(axis=1) > 0).sum()
+    return (roll.sum(axis=1) > 0).sum()
 
 
 def stepD(roll):
@@ -175,7 +175,7 @@ def syness(pattern):
 
 
 def polysync(lowstream, midstream, histream):
-    """Computes the polyphonic syncopation of a rhythm, as described in [8].
+    """Computes the polyphonic syncopation of a rhythm, as described in [Witek et al., 2014].
 
     If N is a note that precedes a rest R, and R has a metric weight greater than or equal to N, then the pair (N, R)
     is said to constitute a monophonic syncopation. If N is a note on a certain instrument that precedes a note on a
@@ -183,7 +183,7 @@ def polysync(lowstream, midstream, histream):
     to constitute a polyphonic syncopation.
     """
 
-    # metric profile as described by witek
+    # Metric profile as described by Witek et al
     salience_w = [0, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3]
     syncopation_list = []
 
@@ -224,11 +224,11 @@ def polysync(lowstream, midstream, histream):
             if (event[0] == 1 or event[1] == 1) and event_next == [0, 0, 1]:
                 instrumental_weight = 5
 
-            # Low against mid (ATTENTION: not defined in [8])
+            # Low against mid (ATTENTION: not defined in [Witek et al., 2014])
             if event == [1, 0, 0] and event_next == [0, 1, 0]:
                 instrumental_weight = 2
 
-            # Mid against low (ATTENTION: not defined in [8])
+            # Mid against low (ATTENTION: not defined in [Witek et al., 2014])
             if event == [0, 1, 0] and event_next == [1, 0, 0]:
                 instrumental_weight = 2
 
@@ -243,7 +243,7 @@ def polysync(lowstream, midstream, histream):
 
 
 def polyevenness(lowstream, midstream, histream):
-    """Compute the polyphonic evenness. Adapted from [7]"""
+    """Compute the polyphonic evenness. Adapted from [Milne and Herff, 2020]"""
     low_evenness = evenness(lowstream)
     mid_evenness = evenness(midstream)
     hi_evenness = evenness(histream)
@@ -252,7 +252,7 @@ def polyevenness(lowstream, midstream, histream):
 
 
 def polybalance(lowstream, midstream, histream):
-    """Compute the polyphonic balance of a rhythm. Adapted from [7]"""
+    """Compute the polyphonic balance of a rhythm. Adapted from [Milne and Herff, 2020]"""
 
     d = density(lowstream) * 3 + density(midstream) * 2 + density(histream)
     if d == 0:
