@@ -1,4 +1,4 @@
-"""This module defines a mapping of the General MIDI Percussion Key Map (GMPKM) to three frequency levels"""
+"""A mapping of the General MIDI Percussion Key Map (GMPKM) to three frequency levels: low, mid, and high"""
 
 low_instruments = [35, 36, 41, 45, 47, 64]
 mid_instruments = [37, 38, 39, 40, 43, 48, 50, 58, 61, 62, 65, 77]

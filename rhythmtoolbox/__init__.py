@@ -46,6 +46,7 @@ def get_streams(roll):
 
 
 def pattlist_to_pianoroll(pattlist):
+    """Convert from a pattern list representation to a piano roll representation"""
     roll = np.zeros((len(pattlist), 128))
     for i in range(len(roll)):
         roll[i][pattlist[i]] = 1
@@ -120,7 +121,15 @@ def pattlist2descriptors(pattlist):
     A pattern list is a list of lists representing time steps, each containing the MIDI note numbers that occur at that
     step, e.g. [[36, 42], [], [37], []]. Velocity is not included.
 
-    Some descriptors are valid only for 16-step patterns and will be None if the pattern is not divisible by 16.
+    Some descriptors are valid only for 16-step patterns and will be None if the pattern length is not divisible by 16.
     """
     roll = pattlist_to_pianoroll(pattlist)
     return pianoroll2descriptors(roll)
+
+
+def midifile2descriptors(midi_filepath):
+    """Compute all descriptors from a MIDI file."""
+    import pypianoroll
+
+    multitrack = pypianoroll.read(midi_filepath, resolution=4)
+    return pianoroll2descriptors(multitrack[0].pianoroll)
