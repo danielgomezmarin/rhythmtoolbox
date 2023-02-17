@@ -1,8 +1,0 @@
-order, 1;
-step, 10;
-aa, ia 0.25 eo 0.25 eh 0.25 bk 0.25;
-ac, ee 0.5 ke 0.5;
-ba, ak 1.0;
-ai, ac 1.0;
-ak, ea 1.0;
-ea, ei 1.0;

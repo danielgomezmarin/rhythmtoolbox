@@ -1,9 +1,0 @@
-order, 1;
-step, 3;
-me, ea 1.0;
-ae, aa 1.0;
-ea, aa 0.5 ma 0.5;
-ia, ia 0.2 aa 1.0 ac 0.2 ea 0.8 ca 0.2;
-ma, aa 1.0 ae 0.5;
-ie, ia 1.0;
-if, aa 1.0;

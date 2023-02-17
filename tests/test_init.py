@@ -15,7 +15,7 @@ from rhythmtoolbox import (
 
 
 def test_midifile2descriptors():
-    v = midifile2descriptors("assets/midi/boska/3.mid")
+    v = midifile2descriptors("midi/boska/3.mid")
     assert v["noi"] == 5
     assert v["lowD"] == 4
     assert v["midD"] == 5
@@ -35,7 +35,7 @@ def test_midifile2descriptors():
     assert v["polybalance"] == 0.9618538544571633
     assert v["polyD"] == 19
 
-    v = midifile2descriptors("assets/midi/boska/8.mid")
+    v = midifile2descriptors("midi/boska/8.mid")
     assert v["noi"] == 4
     assert v["lowD"] == 6
     assert v["midD"] == 10
@@ -55,7 +55,7 @@ def test_midifile2descriptors():
     assert v["polybalance"] == 0.9961791398488665
     assert v["polyD"] == 25
 
-    v = midifile2descriptors("assets/midi/boska/9.mid")
+    v = midifile2descriptors("midi/boska/9.mid")
     assert v["noi"] == 6
     assert v["lowD"] == 8
     assert v["midD"] == 7
