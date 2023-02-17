@@ -1,6 +1,4 @@
 from rhythmtoolbox import (
-    get_stream,
-    get_streams,
     pattlist2descriptors,
     pattlist_to_pianoroll,
     pianoroll2descriptors,
@@ -21,7 +19,12 @@ from rhythmtoolbox.descriptors import (
     syncopation16_awareness,
     syness,
 )
-from rhythmtoolbox.midi_mapping import event_to_3number, event_to_8number
+from rhythmtoolbox.midi_mapping import (
+    get_band,
+    get_bands,
+    event_to_3number,
+    event_to_8number,
+)
 
 # TODO: add test case for non-16-step pattern
 PATT_1 = [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0]
@@ -103,8 +106,8 @@ def test_balance():
     assert balance(PATT_2) == 0.9609819355967744
 
 
-def test_get_stream():
-    assert get_stream(BOSKA_3, "low").tolist() == [
+def test_get_band():
+    assert get_band(BOSKA_3, "low").tolist() == [
         1,
         0,
         0,
@@ -122,7 +125,7 @@ def test_get_stream():
         1,
         0,
     ]
-    assert get_stream(BOSKA_8, "low").tolist() == [
+    assert get_band(BOSKA_8, "low").tolist() == [
         0,
         0,
         0,
@@ -140,7 +143,7 @@ def test_get_stream():
         0,
         0,
     ]
-    assert get_stream(BOSKA_9, "low").tolist() == [
+    assert get_band(BOSKA_9, "low").tolist() == [
         1,
         1,
         0,
@@ -157,64 +160,64 @@ def test_get_stream():
         1,
         0,
         0,
-    ]
-
-    assert get_stream(BOSKA_3, "mid").tolist() == [
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-    ]
-    assert get_stream(BOSKA_8, "mid").tolist() == [
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1,
-    ]
-    assert get_stream(BOSKA_9, "mid").tolist() == [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        1,
-        1,
-        0,
-        1,
-        1,
-        0,
-        1,
-        1,
     ]
 
-    assert get_stream(BOSKA_3, "hi").tolist() == [
+    assert get_band(BOSKA_3, "mid").tolist() == [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+    ]
+    assert get_band(BOSKA_8, "mid").tolist() == [
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+    ]
+    assert get_band(BOSKA_9, "mid").tolist() == [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+    ]
+
+    assert get_band(BOSKA_3, "hi").tolist() == [
         1,
         0,
         0,
@@ -232,7 +235,7 @@ def test_get_stream():
         1,
         0,
     ]
-    assert get_stream(BOSKA_8, "hi").tolist() == [
+    assert get_band(BOSKA_8, "hi").tolist() == [
         1,
         1,
         1,
@@ -250,7 +253,7 @@ def test_get_stream():
         1,
         0,
     ]
-    assert get_stream(BOSKA_9, "hi").tolist() == [
+    assert get_band(BOSKA_9, "hi").tolist() == [
         1,
         0,
         1,
@@ -277,20 +280,20 @@ def test_noi():
 
 
 def test_density():
-    lowstream, midstream, histream = get_streams(BOSKA_3)
-    assert density(lowstream) == 4
-    assert density(midstream) == 5
-    assert density(histream) == 10
+    lowband, midband, hiband = get_bands(BOSKA_3)
+    assert density(lowband) == 4
+    assert density(midband) == 5
+    assert density(hiband) == 10
 
-    lowstream, midstream, histream = get_streams(BOSKA_8)
-    assert density(lowstream) == 6
-    assert density(midstream) == 10
-    assert density(histream) == 9
+    lowband, midband, hiband = get_bands(BOSKA_8)
+    assert density(lowband) == 6
+    assert density(midband) == 10
+    assert density(hiband) == 9
 
-    lowstream, midstream, histream = get_streams(BOSKA_9)
-    assert density(lowstream) == 8
-    assert density(midstream) == 7
-    assert density(histream) == 9
+    lowband, midband, hiband = get_bands(BOSKA_9)
+    assert density(lowband) == 8
+    assert density(midband) == 7
+    assert density(hiband) == 9
 
 
 def test_stepD():
@@ -301,101 +304,101 @@ def test_stepD():
 
 def test_bandness():
     n_onset_steps = get_n_onset_steps(BOSKA_3)
-    lowstream, midstream, histream = get_streams(BOSKA_3)
-    assert bandness(lowstream, n_onset_steps) == 0.36363636363636365
-    assert bandness(midstream, n_onset_steps) == 0.45454545454545453
-    assert bandness(histream, n_onset_steps) == 0.9090909090909091
+    lowband, midband, hiband = get_bands(BOSKA_3)
+    assert bandness(lowband, n_onset_steps) == 0.36363636363636365
+    assert bandness(midband, n_onset_steps) == 0.45454545454545453
+    assert bandness(hiband, n_onset_steps) == 0.9090909090909091
 
     n_onset_steps = get_n_onset_steps(BOSKA_8)
-    lowstream, midstream, histream = get_streams(BOSKA_8)
-    assert bandness(lowstream, n_onset_steps) == 0.375
-    assert bandness(midstream, n_onset_steps) == 0.625
-    assert bandness(histream, n_onset_steps) == 0.5625
+    lowband, midband, hiband = get_bands(BOSKA_8)
+    assert bandness(lowband, n_onset_steps) == 0.375
+    assert bandness(midband, n_onset_steps) == 0.625
+    assert bandness(hiband, n_onset_steps) == 0.5625
 
     n_onset_steps = get_n_onset_steps(BOSKA_9)
-    lowstream, midstream, histream = get_streams(BOSKA_9)
-    assert bandness(lowstream, n_onset_steps) == 0.5714285714285714
-    assert bandness(midstream, n_onset_steps) == 0.5
-    assert bandness(histream, n_onset_steps) == 0.6428571428571429
+    lowband, midband, hiband = get_bands(BOSKA_9)
+    assert bandness(lowband, n_onset_steps) == 0.5714285714285714
+    assert bandness(midband, n_onset_steps) == 0.5
+    assert bandness(hiband, n_onset_steps) == 0.6428571428571429
 
 
 def test_syncopation16():
     assert syncopation16(PATT_1) == -4
     assert syncopation16(PATT_2) == -10
 
-    lowstream, midstream, histream = get_streams(BOSKA_3)
-    assert syncopation16(lowstream) == -7
-    assert syncopation16(midstream) == -4
-    assert syncopation16(histream) == -10
-    lowstream, midstream, histream = get_streams(BOSKA_8)
-    assert syncopation16(lowstream) == 3
-    assert syncopation16(midstream) == -4
-    assert syncopation16(histream) == -5
-    lowstream, midstream, histream = get_streams(BOSKA_9)
-    assert syncopation16(lowstream) == 4
-    assert syncopation16(midstream) == 2
-    assert syncopation16(histream) == -12
+    lowband, midband, hiband = get_bands(BOSKA_3)
+    assert syncopation16(lowband) == -7
+    assert syncopation16(midband) == -4
+    assert syncopation16(hiband) == -10
+    lowband, midband, hiband = get_bands(BOSKA_8)
+    assert syncopation16(lowband) == 3
+    assert syncopation16(midband) == -4
+    assert syncopation16(hiband) == -5
+    lowband, midband, hiband = get_bands(BOSKA_9)
+    assert syncopation16(lowband) == 4
+    assert syncopation16(midband) == 2
+    assert syncopation16(hiband) == -12
 
 
 def test_syness():
-    lowstream, midstream, histream = get_streams(BOSKA_3)
-    assert syness(lowstream) == -1.75
-    assert syness(midstream) == -0.8
-    assert syness(histream) == -1.0
+    lowband, midband, hiband = get_bands(BOSKA_3)
+    assert syness(lowband) == -1.75
+    assert syness(midband) == -0.8
+    assert syness(hiband) == -1.0
 
-    lowstream, midstream, histream = get_streams(BOSKA_8)
-    assert syness(lowstream) == 0.5
-    assert syness(midstream) == -0.4
-    assert syness(histream) == -0.5555555555555556
+    lowband, midband, hiband = get_bands(BOSKA_8)
+    assert syness(lowband) == 0.5
+    assert syness(midband) == -0.4
+    assert syness(hiband) == -0.5555555555555556
 
-    lowstream, midstream, histream = get_streams(BOSKA_9)
-    assert syness(lowstream) == 0.5
-    assert syness(midstream) == 0.2857142857142857
-    assert syness(histream) == -1.3333333333333333
+    lowband, midband, hiband = get_bands(BOSKA_9)
+    assert syness(lowband) == 0.5
+    assert syness(midband) == 0.2857142857142857
+    assert syness(hiband) == -1.3333333333333333
 
 
 def test_polysync():
-    lowstream, midstream, histream = get_streams(BOSKA_3)
-    assert polysync(lowstream, midstream, histream) == 9
+    lowband, midband, hiband = get_bands(BOSKA_3)
+    assert polysync(lowband, midband, hiband) == 9
 
-    lowstream, midstream, histream = get_streams(BOSKA_8)
-    assert polysync(lowstream, midstream, histream) == 7
+    lowband, midband, hiband = get_bands(BOSKA_8)
+    assert polysync(lowband, midband, hiband) == 7
 
-    lowstream, midstream, histream = get_streams(BOSKA_9)
-    assert polysync(lowstream, midstream, histream) == 20
+    lowband, midband, hiband = get_bands(BOSKA_9)
+    assert polysync(lowband, midband, hiband) == 20
 
 
 def test_polyevenness():
-    lowstream, midstream, histream = get_streams(BOSKA_3)
-    assert polyevenness(lowstream, midstream, histream) == 5.2753683906977775
+    lowband, midband, hiband = get_bands(BOSKA_3)
+    assert polyevenness(lowband, midband, hiband) == 5.2753683906977775
 
-    lowstream, midstream, histream = get_streams(BOSKA_8)
-    assert polyevenness(lowstream, midstream, histream) == 4.428794764473658
+    lowband, midband, hiband = get_bands(BOSKA_8)
+    assert polyevenness(lowband, midband, hiband) == 4.428794764473658
 
-    lowstream, midstream, histream = get_streams(BOSKA_9)
-    assert polyevenness(lowstream, midstream, histream) == 4.9758868520193955
+    lowband, midband, hiband = get_bands(BOSKA_9)
+    assert polyevenness(lowband, midband, hiband) == 4.9758868520193955
 
 
 def test_polybalance():
-    lowstream, midstream, histream = get_streams(BOSKA_3)
-    assert polybalance(lowstream, midstream, histream) == 0.9618538544571633
+    lowband, midband, hiband = get_bands(BOSKA_3)
+    assert polybalance(lowband, midband, hiband) == 0.9618538544571633
 
-    lowstream, midstream, histream = get_streams(BOSKA_8)
-    assert polybalance(lowstream, midstream, histream) == 0.9961791398488665
+    lowband, midband, hiband = get_bands(BOSKA_8)
+    assert polybalance(lowband, midband, hiband) == 0.9961791398488665
 
-    lowstream, midstream, histream = get_streams(BOSKA_9)
-    assert polybalance(lowstream, midstream, histream) == 0.7964353630870814
+    lowband, midband, hiband = get_bands(BOSKA_9)
+    assert polybalance(lowband, midband, hiband) == 0.7964353630870814
 
 
 def test_polyD():
-    lowstream, midstream, histream = get_streams(BOSKA_3)
-    assert polyD(lowstream, midstream, histream) == 19
+    lowband, midband, hiband = get_bands(BOSKA_3)
+    assert polyD(lowband, midband, hiband) == 19
 
-    lowstream, midstream, histream = get_streams(BOSKA_8)
-    assert polyD(lowstream, midstream, histream) == 25
+    lowband, midband, hiband = get_bands(BOSKA_8)
+    assert polyD(lowband, midband, hiband) == 25
 
-    lowstream, midstream, histream = get_streams(BOSKA_9)
-    assert polyD(lowstream, midstream, histream) == 24
+    lowband, midband, hiband = get_bands(BOSKA_9)
+    assert polyD(lowband, midband, hiband) == 24
 
 
 def test_pianoroll2descriptors():
