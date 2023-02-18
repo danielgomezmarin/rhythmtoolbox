@@ -77,16 +77,18 @@ pattlist2descriptors(pattlist)
 
 The mapping of MIDI instruments to frequency bands can be found in [midi_mapping.py](./rhythmtoolbox/midi_mapping.py).
 
-| Name    | Description                            |
-|---------|----------------------------------------|
-| noi     | Number of instruments                  |
-| lowD    | Number of onsets in the low freq band  |
-| midD    | Number of onsets in the mid freq band  |
-| hiD     | Number of onsets in the high freq band |
-| stepD   | Percentage of steps with onsets        |
-| lowness | Concentration in the low freq band     |
-| midness | Concentration in the mid freq band     |
-| hiness  | Concentration in the high freq band    |
+| Name      | Description                              |
+|-----------|------------------------------------------|
+| noi       | Number of instruments                    |
+| lowD      | Number of onsets in the low freq band    |
+| midD      | Number of onsets in the mid freq band    |
+| hiD       | Number of onsets in the high freq band   |
+| polyD     | Total number of onsets across all bands  |
+| stepD     | Percentage of steps with onsets          |
+| lowness   | Concentration in the low freq band       |
+| midness   | Concentration in the mid freq band       |
+| hiness    | Concentration in the high freq band      |
+
 
 The following descriptors are valid only for 16-step patterns:
 
@@ -101,7 +103,7 @@ The following descriptors are valid only for 16-step patterns:
 | polybalance  | Polyphonic balance                               | [Milne and Herff, 2020](https://doi.org/10.1016/j.cognition.2020.104233) |
 | polyevenness | Polyphonic evenness                              | [Milne and Dean, 2016](https://doi.org/10.1162/COMJ_a_00343)             |
 | polysync     | Polyphonic syncopation                           | [Witek et al, 2014](https://doi.org/10.1371/journal.pone.0094446)        |
-| polyD        | Total number of onsets across all bands          |                                                                          |
+
 
 ## Attribution
 

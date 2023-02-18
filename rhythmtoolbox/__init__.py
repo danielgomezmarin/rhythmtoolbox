@@ -65,6 +65,7 @@ def pianoroll2descriptors(roll):
     result["lowD"] = density(lowband)
     result["midD"] = density(midband)
     result["hiD"] = density(hiband)
+    result["polyD"] = polyD(lowband, midband, hiband)
     result["stepD"] = stepD(roll)
     result["lowness"] = bandness(lowband, n_onset_steps)
     result["midness"] = bandness(midband, n_onset_steps)
@@ -81,7 +82,6 @@ def pianoroll2descriptors(roll):
         result["polybalance"] = polybalance(lowband, midband, hiband)
         result["polyevenness"] = polyevenness(lowband, midband, hiband)
         result["polysync"] = polysync(lowband, midband, hiband)
-        result["polyD"] = polyD(lowband, midband, hiband)
 
     return result
 
