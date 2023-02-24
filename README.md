@@ -27,7 +27,7 @@ To compute descriptors from a MIDI file:
 ```python
 from rhythmtoolbox import midifile2descriptors
 
-midifile2descriptors('assets/midi/boska/3.mid')
+midifile2descriptors('midi/boska/3.mid')
 ```
 
 #### Piano roll
@@ -77,7 +77,9 @@ pattlist2descriptors(pattlist)
 
 ## Descriptors
 
-The mapping of MIDI instruments to frequency bands can be found in [midi_mapping.py](./rhythmtoolbox/midi_mapping.py).
+The following descriptors are discussed in [Gómez-Marín et al, 2020](https://doi.org/10.1080/09298215.2020.1806887).
+Additional sources are listed where applicable. The mapping of MIDI instruments to frequency bands can be found
+in [midi_mapping.py](./rhythmtoolbox/midi_mapping.py).
 
 | Name    | Description                             |
 |---------|-----------------------------------------|
@@ -101,8 +103,10 @@ The following descriptors are valid only for 16-step patterns:
 | lowsyness    | Syncopation of the low freq band divided by lowD |                                                                          |
 | midsyness    | Syncopation of the mid freq band divided by midD |                                                                          |
 | hisyness     | Syncopation of the high freq band divided by hiD |                                                                          |
-| polybalance  | Polyphonic balance                               | [Milne and Herff, 2020](https://doi.org/10.1016/j.cognition.2020.104233) |
-| polyevenness | Polyphonic evenness                              | [Milne and Dean, 2016](https://doi.org/10.1162/COMJ_a_00343)             |
+| balance      | Monophonic balance                               | [Milne and Herff, 2020](https://doi.org/10.1016/j.cognition.2020.104233) |
+| evenness     | Monophonic evenness                              | [Milne and Dean, 2016](https://doi.org/10.1162/COMJ_a_00343)             |
+| polybalance  | Polyphonic balance                               |                                                                          |
+| polyevenness | Polyphonic evenness                              |                                                                          |
 | polysync     | Polyphonic syncopation                           | [Witek et al, 2014](https://doi.org/10.1371/journal.pone.0094446)        |
 
 ## Attribution
@@ -121,3 +125,6 @@ via the BibTeX below.
       year={2020},
       publisher={Taylor \& Francis}
     }
+
+The MIDI drum patterns examples included in [midi/boska](./midi/boska) and [midi/sano](./midi/sano) were provided by
+Jon-Eirik Boska and Sebastián Hoyos, respectively.
