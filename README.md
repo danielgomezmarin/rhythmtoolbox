@@ -16,7 +16,9 @@ pip install git+https://github.com/danielgomezmarin/rhythmtoolbox
 
 ## Usage
 
-Rhythm Toolbox supports the multiple representations of symbolic rhythm.
+Rhythm Toolbox supports multiple representations of symbolic rhythm. Across all representations, Rhythm Toolbox operates
+at a 16th note resolution, or 4 ticks per beat in MIDI terms. If data is passed in at a different resolution, it is
+resampled by associating each onset with its closest 16th note position.
 
 #### MIDI
 
@@ -77,18 +79,17 @@ pattlist2descriptors(pattlist)
 
 The mapping of MIDI instruments to frequency bands can be found in [midi_mapping.py](./rhythmtoolbox/midi_mapping.py).
 
-| Name      | Description                              |
-|-----------|------------------------------------------|
-| noi       | Number of instruments                    |
-| lowD      | Number of onsets in the low freq band    |
-| midD      | Number of onsets in the mid freq band    |
-| hiD       | Number of onsets in the high freq band   |
-| polyD     | Total number of onsets across all bands  |
-| stepD     | Percentage of steps with onsets          |
-| lowness   | Concentration in the low freq band       |
-| midness   | Concentration in the mid freq band       |
-| hiness    | Concentration in the high freq band      |
-
+| Name    | Description                             |
+|---------|-----------------------------------------|
+| noi     | Number of instruments                   |
+| lowD    | Number of onsets in the low freq band   |
+| midD    | Number of onsets in the mid freq band   |
+| hiD     | Number of onsets in the high freq band  |
+| polyD   | Total number of onsets across all bands |
+| stepD   | Percentage of steps with onsets         |
+| lowness | Concentration in the low freq band      |
+| midness | Concentration in the mid freq band      |
+| hiness  | Concentration in the high freq band     |
 
 The following descriptors are valid only for 16-step patterns:
 
@@ -103,7 +104,6 @@ The following descriptors are valid only for 16-step patterns:
 | polybalance  | Polyphonic balance                               | [Milne and Herff, 2020](https://doi.org/10.1016/j.cognition.2020.104233) |
 | polyevenness | Polyphonic evenness                              | [Milne and Dean, 2016](https://doi.org/10.1162/COMJ_a_00343)             |
 | polysync     | Polyphonic syncopation                           | [Witek et al, 2014](https://doi.org/10.1371/journal.pone.0094446)        |
-
 
 ## Attribution
 

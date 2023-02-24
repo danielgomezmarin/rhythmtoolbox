@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import ndimage
 
 from .descriptors import (
     bandness,
@@ -24,11 +25,61 @@ def pattlist_to_pianoroll(pattlist):
     return roll
 
 
-def pianoroll2descriptors(roll):
+def compute_16_descriptors(lowband, midband, hiband):
+    """Compute descriptors that are valid only for 16-step patterns"""
+    descriptors = {}
+
+    if not all(len(x) == 16 for x in [lowband, midband, hiband]):
+        return descriptors
+
+    descriptors["lowsync"] = syncopation16(lowband)
+    descriptors["midsync"] = syncopation16(midband)
+    descriptors["hisync"] = syncopation16(hiband)
+    descriptors["lowsyness"] = syness(lowband)
+    descriptors["midsyness"] = syness(midband)
+    descriptors["hisyness"] = syness(hiband)
+    descriptors["polybalance"] = polybalance(lowband, midband, hiband)
+    descriptors["polyevenness"] = polyevenness(lowband, midband, hiband)
+    descriptors["polysync"] = polysync(lowband, midband, hiband)
+
+    return descriptors
+
+
+def resample_pianoroll(roll, from_resolution, to_resolution):
+    """Associate each onset in the roll with its closest 16th note position"""
+
+    if from_resolution == to_resolution:
+        return roll
+
+    # Piano roll must be a 2D array
+    assert len(roll.shape) == 2
+
+    factor = to_resolution / from_resolution
+
+    return ndimage.zoom(roll, (factor, 1), order=0)
+
+
+def pianoroll2descriptors(roll, resolution=4):
     """Compute all descriptors from a piano roll representation of a polyphonic drum pattern.
 
-    Some descriptors are valid only for 16-step patterns and will be None if the pattern is not divisible by 16.
+    Notes
+        - A piano roll with a resolution other than 4 ticks per beat will be resampled, which can be lossy.
+        - Some descriptors are valid only for 16-step patterns and will be None if the pattern is not divisible by 16.
+
+    Parameters
+        roll, np.ndarray
+        The piano roll
+
+        resolution, int
+        The resolution of the piano roll in MIDI ticks per beat
+
+    Returns
+         Descriptors in a dict of {descriptor_name: descriptor_value}
     """
+
+    # Piano roll must be a 2D array
+    assert len(roll.shape) == 2
+
     descriptor_names = [
         "noi",
         "lowD",
@@ -58,8 +109,11 @@ def pianoroll2descriptors(roll):
     if n_onset_steps == 0:
         return result
 
-    # Get the onset pattern of each instrument band
-    lowband, midband, hiband = get_bands(roll)
+    # Resample to a 16-note resolution
+    resampled = resample_pianoroll(roll, resolution, 4)
+
+    # Get the onset pattern of each frequency band
+    lowband, midband, hiband = get_bands(resampled)
 
     result["noi"] = noi(roll)
     result["lowD"] = density(lowband)
@@ -72,21 +126,14 @@ def pianoroll2descriptors(roll):
     result["hiness"] = bandness(hiband, n_onset_steps)
 
     # Compute descriptors that are valid only for 16-step patterns
-    if len(roll) == 16:
-        result["lowsync"] = syncopation16(lowband)
-        result["midsync"] = syncopation16(midband)
-        result["hisync"] = syncopation16(hiband)
-        result["lowsyness"] = syness(lowband)
-        result["midsyness"] = syness(midband)
-        result["hisyness"] = syness(hiband)
-        result["polybalance"] = polybalance(lowband, midband, hiband)
-        result["polyevenness"] = polyevenness(lowband, midband, hiband)
-        result["polysync"] = polysync(lowband, midband, hiband)
+    if len(resampled) == 16:
+        sixteen_descs = compute_16_descriptors(lowband, midband, hiband)
+        result.update(sixteen_descs)
 
     return result
 
 
-def pattlist2descriptors(pattlist):
+def pattlist2descriptors(pattlist, resolution=4):
     """Compute all descriptors from a pattern list representation of a polyphonic drum pattern.
 
     A pattern list is a list of lists representing time steps, each containing the MIDI note numbers that occur at that
@@ -95,7 +142,7 @@ def pattlist2descriptors(pattlist):
     Some descriptors are valid only for 16-step patterns and will be None if the pattern length is not divisible by 16.
     """
     roll = pattlist_to_pianoroll(pattlist)
-    return pianoroll2descriptors(roll)
+    return pianoroll2descriptors(roll, resolution)
 
 
 def midifile2descriptors(midi_filepath):
