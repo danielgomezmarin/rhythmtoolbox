@@ -151,7 +151,7 @@ def get_n_onset_steps(roll):
     return (roll.sum(axis=1) > 0).sum()
 
 
-def stepD(roll):
+def step_density(roll):
     """Returns the percentage of steps with onsets"""
     return get_n_onset_steps(roll) / len(roll)
 
@@ -174,7 +174,7 @@ def syness(pattern):
     return syncopation16(pattern) / d if d else 0
 
 
-def polysync(lowstream, midstream, histream):
+def poly_sync(low_stream, mid_stream, hi_stream):
     """Computes the polyphonic syncopation of a rhythm, as described in [Witek et al., 2014].
 
     If N is a note that precedes a rest R, and R has a metric weight greater than or equal to N, then the pair (N, R)
@@ -183,23 +183,23 @@ def polysync(lowstream, midstream, histream):
     to constitute a polyphonic syncopation.
     """
 
-    # Metric profile as described by Witek et al
+    # Metric profile as described by Witek et al. (2014)
     salience_w = [0, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3, -1, -3, -2, -3]
     syncopation_list = []
 
     # number of time steps
-    n = len(lowstream)
+    n = len(low_stream)
 
     # find pairs of N and Ndi notes events
     for ix in range(n):
         # describe the instruments present in current and next steps
-        event = [lowstream[ix], midstream[ix], histream[ix]]
+        event = [low_stream[ix], mid_stream[ix], hi_stream[ix]]
 
         next_ix = (ix + 1) % n
         event_next = [
-            lowstream[next_ix],
-            midstream[next_ix],
-            histream[next_ix],
+            low_stream[next_ix],
+            mid_stream[next_ix],
+            hi_stream[next_ix],
         ]
 
         # syncopation occurs when adjacent events are different, and succeeding event has greater or equal metric weight
@@ -224,11 +224,11 @@ def polysync(lowstream, midstream, histream):
             if (event[0] == 1 or event[1] == 1) and event_next == [0, 0, 1]:
                 instrumental_weight = 5
 
-            # Low against mid (ATTENTION: not defined in [Witek et al., 2014])
+            # Low against mid (NOTE: not defined in [Witek et al., 2014])
             if event == [1, 0, 0] and event_next == [0, 1, 0]:
                 instrumental_weight = 2
 
-            # Mid against low (ATTENTION: not defined in [Witek et al., 2014])
+            # Mid against low (NOTE: not defined in [Witek et al., 2014])
             if event == [0, 1, 0] and event_next == [1, 0, 0]:
                 instrumental_weight = 2
 
@@ -242,37 +242,37 @@ def polysync(lowstream, midstream, histream):
     return sum(syncopation_list)
 
 
-def polyevenness(lowstream, midstream, histream):
+def poly_evenness(low_stream, mid_stream, hi_stream):
     """Compute the polyphonic evenness. Adapted from [Milne and Herff, 2020]"""
-    low_evenness = evenness(lowstream)
-    mid_evenness = evenness(midstream)
-    hi_evenness = evenness(histream)
+    low_evenness = evenness(low_stream)
+    mid_evenness = evenness(mid_stream)
+    hi_evenness = evenness(hi_stream)
 
     return low_evenness * 3 + mid_evenness * 2 + hi_evenness
 
 
-def polybalance(lowstream, midstream, histream):
+def poly_balance(low_stream, mid_stream, hi_stream):
     """Compute the polyphonic balance of a rhythm. Adapted from [Milne and Herff, 2020]"""
 
-    d = density(lowstream) * 3 + density(midstream) * 2 + density(histream)
+    d = density(low_stream) * 3 + density(mid_stream) * 2 + density(hi_stream)
     if d == 0:
         return 1
 
     center = np.array([0, 0])
     iso_angle_16 = 2 * math.pi / 16
 
-    Xlow = [3 * math.cos(i * iso_angle_16) for i, x in enumerate(lowstream) if x == 1]
-    Ylow = [3 * math.sin(i * iso_angle_16) for i, x in enumerate(lowstream) if x == 1]
+    Xlow = [3 * math.cos(i * iso_angle_16) for i, x in enumerate(low_stream) if x == 1]
+    Ylow = [3 * math.sin(i * iso_angle_16) for i, x in enumerate(low_stream) if x == 1]
     matrixlow = np.array([Xlow, Ylow])
     matrixlowsum = matrixlow.sum(axis=1)
 
-    Xmid = [2 * math.cos(i * iso_angle_16) for i, x in enumerate(midstream) if x == 1]
-    Ymid = [2 * math.sin(i * iso_angle_16) for i, x in enumerate(midstream) if x == 1]
+    Xmid = [2 * math.cos(i * iso_angle_16) for i, x in enumerate(mid_stream) if x == 1]
+    Ymid = [2 * math.sin(i * iso_angle_16) for i, x in enumerate(mid_stream) if x == 1]
     matrixmid = np.array([Xmid, Ymid])
     matrixmidsum = matrixmid.sum(axis=1)
 
-    Xhi = [2 * math.cos(i * iso_angle_16) for i, x in enumerate(histream) if x == 1]
-    Yhi = [2 * math.sin(i * iso_angle_16) for i, x in enumerate(histream) if x == 1]
+    Xhi = [2 * math.cos(i * iso_angle_16) for i, x in enumerate(hi_stream) if x == 1]
+    Yhi = [2 * math.sin(i * iso_angle_16) for i, x in enumerate(hi_stream) if x == 1]
     matrixhi = np.array([Xhi, Yhi])
     matrixhisum = matrixhi.sum(axis=1)
 
@@ -283,6 +283,6 @@ def polybalance(lowstream, midstream, histream):
     return 1 - magnitude
 
 
-def polyD(lowstream, midstream, histream):
+def poly_density(low_stream, mid_stream, hi_stream):
     # compute the total number of onsets
-    return density(lowstream) + density(midstream) + density(histream)
+    return density(low_stream) + density(mid_stream) + density(hi_stream)

@@ -6,11 +6,13 @@ from .descriptors import (
     density,
     get_n_onset_steps,
     noi,
-    polybalance,
-    polyD,
-    polyevenness,
-    polysync,
-    stepD,
+    balance,
+    evenness,
+    poly_balance,
+    poly_density,
+    poly_evenness,
+    poly_sync,
+    step_density,
     syncopation16,
     syness,
 )
@@ -23,26 +25,6 @@ def pattlist_to_pianoroll(pattlist):
     for i in range(len(roll)):
         roll[i][pattlist[i]] = 1
     return roll
-
-
-def compute_16_descriptors(lowband, midband, hiband):
-    """Compute descriptors that are valid only for 16-step patterns"""
-    descriptors = {}
-
-    if not all(len(x) == 16 for x in [lowband, midband, hiband]):
-        return descriptors
-
-    descriptors["lowsync"] = syncopation16(lowband)
-    descriptors["midsync"] = syncopation16(midband)
-    descriptors["hisync"] = syncopation16(hiband)
-    descriptors["lowsyness"] = syness(lowband)
-    descriptors["midsyness"] = syness(midband)
-    descriptors["hisyness"] = syness(hiband)
-    descriptors["polybalance"] = polybalance(lowband, midband, hiband)
-    descriptors["polyevenness"] = polyevenness(lowband, midband, hiband)
-    descriptors["polysync"] = polysync(lowband, midband, hiband)
-
-    return descriptors
 
 
 def resample_pianoroll(roll, from_resolution, to_resolution):
@@ -82,53 +64,64 @@ def pianoroll2descriptors(roll, resolution=4):
 
     descriptor_names = [
         "noi",
-        "lowD",
-        "midD",
-        "hiD",
-        "stepD",
+        "lowDensity",
+        "midDensity",
+        "hiDensity",
+        "stepDensity",
         "lowness",
         "midness",
         "hiness",
-        "lowsync",
-        "midsync",
-        "hisync",
-        "lowsyness",
-        "midsyness",
-        "hisyness",
-        "polybalance",
-        "polyevenness",
-        "polysync",
-        "polyD",
+        "lowSync",
+        "midSync",
+        "hiSync",
+        "lowSyness",
+        "midSyness",
+        "hiSyness",
+        "balance",
+        "polyBalance",
+        "evenness",
+        "polyEvenness",
+        "polySync",
+        "polyDensity",
     ]
 
     # Initialize the return dict
     result = {d: None for d in descriptor_names}
 
-    # No need to compute descriptors for empty patterns
-    n_onset_steps = get_n_onset_steps(roll)
-    if n_onset_steps == 0:
-        return result
-
     # Resample to a 16-note resolution
     resampled = resample_pianoroll(roll, resolution, 4)
 
-    # Get the onset pattern of each frequency band
-    lowband, midband, hiband = get_bands(resampled)
+    # No need to compute descriptors for empty patterns
+    n_onset_steps = get_n_onset_steps(resampled)
+    if n_onset_steps == 0:
+        return result
 
-    result["noi"] = noi(roll)
-    result["lowD"] = density(lowband)
-    result["midD"] = density(midband)
-    result["hiD"] = density(hiband)
-    result["polyD"] = polyD(lowband, midband, hiband)
-    result["stepD"] = stepD(roll)
-    result["lowness"] = bandness(lowband, n_onset_steps)
-    result["midness"] = bandness(midband, n_onset_steps)
-    result["hiness"] = bandness(hiband, n_onset_steps)
+    # Get the onset pattern of each frequency band
+    low_band, mid_band, hi_band = get_bands(resampled)
+
+    result["noi"] = noi(resampled)
+    result["lowDensity"] = density(low_band)
+    result["midDensity"] = density(mid_band)
+    result["hiDensity"] = density(hi_band)
+    result["polyDensity"] = poly_density(low_band, mid_band, hi_band)
+    result["stepDensity"] = step_density(resampled)
+    result["lowness"] = bandness(low_band, n_onset_steps)
+    result["midness"] = bandness(mid_band, n_onset_steps)
+    result["hiness"] = bandness(hi_band, n_onset_steps)
 
     # Compute descriptors that are valid only for 16-step patterns
     if len(resampled) == 16:
-        sixteen_descs = compute_16_descriptors(lowband, midband, hiband)
-        result.update(sixteen_descs)
+        sixteen_step_descs = {}
+        sixteen_step_descs["lowSync"] = syncopation16(low_band)
+        sixteen_step_descs["midSync"] = syncopation16(mid_band)
+        sixteen_step_descs["hiSync"] = syncopation16(hi_band)
+        sixteen_step_descs["lowSyness"] = syness(low_band)
+        sixteen_step_descs["midSyness"] = syness(mid_band)
+        sixteen_step_descs["hiSyness"] = syness(hi_band)
+        sixteen_step_descs["polyBalance"] = poly_balance(low_band, mid_band, hi_band)
+        sixteen_step_descs["polyEvenness"] = poly_evenness(low_band, mid_band, hi_band)
+        sixteen_step_descs["polySync"] = poly_sync(low_band, mid_band, hi_band)
+        result.update(sixteen_step_descs)
 
     return result
 
