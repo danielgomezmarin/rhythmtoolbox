@@ -7,11 +7,11 @@ from rhythmtoolbox.descriptors import (
     evenness,
     get_n_onset_steps,
     noi,
-    polybalance,
-    polyD,
-    polyevenness,
-    polysync,
-    stepD,
+    poly_balance,
+    poly_density,
+    poly_evenness,
+    poly_sync,
+    step_density,
     syncopation16,
     syncopation16_awareness,
     syness,
@@ -57,10 +57,10 @@ def test_density():
     assert density(hiband) == 9
 
 
-def test_stepD():
-    assert stepD(BOSKA_3) == 0.6875
-    assert stepD(BOSKA_8) == 1.0
-    assert stepD(BOSKA_9) == 0.875
+def test_stepDensity():
+    assert step_density(BOSKA_3) == 0.6875
+    assert step_density(BOSKA_8) == 1.0
+    assert step_density(BOSKA_9) == 0.875
 
 
 def test_bandness():
@@ -118,45 +118,45 @@ def test_syness():
     assert syness(hiband) == -1.3333333333333333
 
 
-def test_polysync():
+def test_polySync():
     lowband, midband, hiband = get_bands(BOSKA_3)
-    assert polysync(lowband, midband, hiband) == 9
+    assert poly_sync(lowband, midband, hiband) == 9
 
     lowband, midband, hiband = get_bands(BOSKA_8)
-    assert polysync(lowband, midband, hiband) == 7
+    assert poly_sync(lowband, midband, hiband) == 7
 
     lowband, midband, hiband = get_bands(BOSKA_9)
-    assert polysync(lowband, midband, hiband) == 20
+    assert poly_sync(lowband, midband, hiband) == 20
 
 
-def test_polyevenness():
+def test_polyEvenness():
     lowband, midband, hiband = get_bands(BOSKA_3)
-    assert polyevenness(lowband, midband, hiband) == 5.2753683906977775
+    assert poly_evenness(lowband, midband, hiband) == 5.2753683906977775
 
     lowband, midband, hiband = get_bands(BOSKA_8)
-    assert polyevenness(lowband, midband, hiband) == 4.428794764473658
+    assert poly_evenness(lowband, midband, hiband) == 4.428794764473658
 
     lowband, midband, hiband = get_bands(BOSKA_9)
-    assert polyevenness(lowband, midband, hiband) == 4.9758868520193955
+    assert poly_evenness(lowband, midband, hiband) == 4.9758868520193955
 
 
-def test_polybalance():
+def test_polyBalance():
     lowband, midband, hiband = get_bands(BOSKA_3)
-    assert polybalance(lowband, midband, hiband) == 0.9618538544571633
+    assert poly_balance(lowband, midband, hiband) == 0.9618538544571633
 
     lowband, midband, hiband = get_bands(BOSKA_8)
-    assert polybalance(lowband, midband, hiband) == 0.9961791398488665
+    assert poly_balance(lowband, midband, hiband) == 0.9961791398488665
 
     lowband, midband, hiband = get_bands(BOSKA_9)
-    assert polybalance(lowband, midband, hiband) == 0.7964353630870814
+    assert poly_balance(lowband, midband, hiband) == 0.7964353630870814
 
 
-def test_polyD():
+def test_polyDensity():
     lowband, midband, hiband = get_bands(BOSKA_3)
-    assert polyD(lowband, midband, hiband) == 19
+    assert poly_density(lowband, midband, hiband) == 19
 
     lowband, midband, hiband = get_bands(BOSKA_8)
-    assert polyD(lowband, midband, hiband) == 25
+    assert poly_density(lowband, midband, hiband) == 25
 
     lowband, midband, hiband = get_bands(BOSKA_9)
-    assert polyD(lowband, midband, hiband) == 24
+    assert poly_density(lowband, midband, hiband) == 24
