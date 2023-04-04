@@ -19,6 +19,32 @@ from .descriptors import (
 from .midi_mapping import get_bands
 
 
+DESCRIPTOR_NAMES = [
+    "noi",
+    "polyDensity",
+    "lowDensity",
+    "midDensity",
+    "hiDensity",
+    "lowness",
+    "midness",
+    "hiness",
+    "stepDensity",
+    "sync",
+    "lowSync",
+    "midSync",
+    "hiSync",
+    "syness",
+    "lowSyness",
+    "midSyness",
+    "hiSyness",
+    "balance",
+    "polyBalance",
+    "evenness",
+    "polyEvenness",
+    "polySync",
+]
+
+
 def pattlist_to_pianoroll(pattlist):
     """Convert from a pattern list representation to a piano roll representation"""
     roll = np.zeros((len(pattlist), 128))
@@ -65,32 +91,8 @@ def pianoroll2descriptors(roll, resolution=4, drums=True):
     # Piano roll must be a 2D array
     assert len(roll.shape) == 2
 
-    descriptor_names = [
-        "noi",
-        "stepDensity",
-        "lowDensity",
-        "midDensity",
-        "hiDensity",
-        "polyDensity",
-        "lowness",
-        "midness",
-        "hiness",
-        "sync",
-        "lowSync",
-        "midSync",
-        "hiSync",
-        "polySync",
-        "lowSyness",
-        "midSyness",
-        "hiSyness",
-        "balance",
-        "polyBalance",
-        "evenness",
-        "polyEvenness",
-    ]
-
     # Initialize the return dict
-    result = {d: None for d in descriptor_names}
+    result = {d: None for d in DESCRIPTOR_NAMES}
 
     # Resample to a 16-note resolution
     resampled = resample_pianoroll(roll, resolution, 4)
@@ -113,7 +115,7 @@ def pianoroll2descriptors(roll, resolution=4, drums=True):
             result["sync"] = syncopation16(resampled)
             result["syness"] = syness(pattern)
 
-        for desc in descriptor_names:
+        for desc in DESCRIPTOR_NAMES:
             if desc not in result:
                 result[desc] = None
 
@@ -139,6 +141,7 @@ def pianoroll2descriptors(roll, resolution=4, drums=True):
         result["lowSync"] = syncopation16(low_band)
         result["midSync"] = syncopation16(mid_band)
         result["hiSync"] = syncopation16(hi_band)
+        result["syness"] = syness(pattern)
         result["lowSyness"] = syness(low_band)
         result["midSyness"] = syness(mid_band)
         result["hiSyness"] = syness(hi_band)
