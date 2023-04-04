@@ -41,7 +41,7 @@ def resample_pianoroll(roll, from_resolution, to_resolution):
     return ndimage.zoom(roll, (factor, 1), order=0)
 
 
-def pianoroll2descriptors(roll, resolution=4):
+def pianoroll2descriptors(roll, resolution=4, drums=True):
     """Compute all descriptors from a piano roll representation of a polyphonic drum pattern.
 
     Notes
@@ -55,6 +55,9 @@ def pianoroll2descriptors(roll, resolution=4):
         resolution, int
         The resolution of the piano roll in MIDI ticks per beat
 
+        drums, bool
+        Indicates whether the pattern is a drum pattern
+
     Returns
          Descriptors in a dict of {descriptor_name: descriptor_value}
     """
@@ -64,16 +67,19 @@ def pianoroll2descriptors(roll, resolution=4):
 
     descriptor_names = [
         "noi",
+        "stepDensity",
         "lowDensity",
         "midDensity",
         "hiDensity",
-        "stepDensity",
+        "polyDensity",
         "lowness",
         "midness",
         "hiness",
+        "sync",
         "lowSync",
         "midSync",
         "hiSync",
+        "polySync",
         "lowSyness",
         "midSyness",
         "hiSyness",
@@ -81,8 +87,6 @@ def pianoroll2descriptors(roll, resolution=4):
         "polyBalance",
         "evenness",
         "polyEvenness",
-        "polySync",
-        "polyDensity",
     ]
 
     # Initialize the return dict
@@ -96,9 +100,29 @@ def pianoroll2descriptors(roll, resolution=4):
     if n_onset_steps == 0:
         return result
 
+    pattern = (resampled.sum(axis=1) > 0).astype(int)
+
+    if not drums:
+        result["noi"] = noi(resampled)
+        result["stepDensity"] = step_density(resampled)
+        result["polyDensity"] = density(pattern)
+
+        if len(resampled) == 16:
+            result["balance"] = balance(pattern)
+            result["evenness"] = evenness(pattern)
+            result["sync"] = syncopation16(resampled)
+            result["syness"] = syness(pattern)
+
+        for desc in descriptor_names:
+            if desc not in result:
+                result[desc] = None
+
+        return result
+
     # Get the onset pattern of each frequency band
     low_band, mid_band, hi_band = get_bands(resampled)
 
+    # Compute descriptors that are valid for any pattern length
     result["noi"] = noi(resampled)
     result["lowDensity"] = density(low_band)
     result["midDensity"] = density(mid_band)
@@ -111,36 +135,59 @@ def pianoroll2descriptors(roll, resolution=4):
 
     # Compute descriptors that are valid only for 16-step patterns
     if len(resampled) == 16:
-        sixteen_step_descs = {}
-        sixteen_step_descs["lowSync"] = syncopation16(low_band)
-        sixteen_step_descs["midSync"] = syncopation16(mid_band)
-        sixteen_step_descs["hiSync"] = syncopation16(hi_band)
-        sixteen_step_descs["lowSyness"] = syness(low_band)
-        sixteen_step_descs["midSyness"] = syness(mid_band)
-        sixteen_step_descs["hiSyness"] = syness(hi_band)
-        sixteen_step_descs["polyBalance"] = poly_balance(low_band, mid_band, hi_band)
-        sixteen_step_descs["polyEvenness"] = poly_evenness(low_band, mid_band, hi_band)
-        sixteen_step_descs["polySync"] = poly_sync(low_band, mid_band, hi_band)
-        result.update(sixteen_step_descs)
+        result["sync"] = syncopation16(pattern)
+        result["lowSync"] = syncopation16(low_band)
+        result["midSync"] = syncopation16(mid_band)
+        result["hiSync"] = syncopation16(hi_band)
+        result["lowSyness"] = syness(low_band)
+        result["midSyness"] = syness(mid_band)
+        result["hiSyness"] = syness(hi_band)
+        result["balance"] = balance(pattern)
+        result["polyBalance"] = poly_balance(low_band, mid_band, hi_band)
+        result["evenness"] = evenness(pattern)
+        result["polyEvenness"] = poly_evenness(low_band, mid_band, hi_band)
+        result["polySync"] = poly_sync(low_band, mid_band, hi_band)
 
     return result
 
 
-def pattlist2descriptors(pattlist, resolution=4):
+def pattlist2descriptors(pattlist, resolution=4, drums=True):
     """Compute all descriptors from a pattern list representation of a polyphonic drum pattern.
 
     A pattern list is a list of lists representing time steps, each containing the MIDI note numbers that occur at that
     step, e.g. [[36, 42], [], [37], []]. Velocity is not included.
 
-    Some descriptors are valid only for 16-step patterns and will be None if the pattern length is not divisible by 16.
+    Parameters
+        pattlist, list
+        The pattern list
+
+        resolution, int
+        The resolution of the piano roll in MIDI ticks per beat
+
+        drums, bool
+        Indicates whether the pattern is a drum pattern
+
+    Returns
+         Descriptors in a dict of {descriptor_name: descriptor_value}
     """
     roll = pattlist_to_pianoroll(pattlist)
-    return pianoroll2descriptors(roll, resolution)
+    return pianoroll2descriptors(roll, resolution, drums=drums)
 
 
-def midifile2descriptors(midi_filepath):
-    """Compute all descriptors from a MIDI file."""
+def midifile2descriptors(midi_filepath, drums=True):
+    """Compute all descriptors from a MIDI file.
+
+    Parameters
+        midi_filepath, str
+        Path to a MIDI file
+
+        drums, bool
+        Indicates whether the pattern is a drum pattern
+
+    Returns
+         Descriptors in a dict of {descriptor_name: descriptor_value}
+    """
     import pypianoroll
 
     multitrack = pypianoroll.read(midi_filepath, resolution=4)
-    return pianoroll2descriptors(multitrack[0].pianoroll)
+    return pianoroll2descriptors(multitrack[0].pianoroll, drums=drums)
