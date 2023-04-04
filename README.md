@@ -93,6 +93,7 @@ The following descriptors are valid only for 16-step patterns:
 
 | Name         | Description                                 | Reference                                                                |
 |--------------|---------------------------------------------|--------------------------------------------------------------------------|
+| sync         | Syncopation                                 |                                                                          |
 | lowSync      | Syncopation of the low freq band            |                                                                          |
 | midSync      | Syncopation of the mid freq band            |                                                                          |
 | hiSync       | Syncopation of the high freq band           |                                                                          |

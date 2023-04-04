@@ -39,42 +39,42 @@ import numpy as np
 # Monophonic descriptors
 
 
-def syncopation16(patt):
+def syncopation16(pattern):
     """Compute the syncopation value of a 16-step pattern
 
-    patt, list
+    pattern, list
         a monophonic pattern as a list of 0s and 1s (1s indicating an onset)
     """
 
-    if isinstance(patt, np.ndarray):
-        patt = patt.tolist()
+    if isinstance(pattern, np.ndarray):
+        pattern = pattern.tolist()
 
     synclist = [0] * 16
     salience_lhl = [5, 1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1]
 
-    n_steps = len(patt)
+    n_steps = len(pattern)
     for ix in range(n_steps):
         next_ix = (ix + 1) % n_steps
         # look for an onset preceding a silence
-        if patt[ix] == 1 and patt[next_ix] == 0:
+        if pattern[ix] == 1 and pattern[next_ix] == 0:
             # compute syncopation
             synclist[ix] = salience_lhl[next_ix] - salience_lhl[ix]
 
     return sum(synclist)
 
 
-def syncopation16_awareness(patt):
+def syncopation16_awareness(pattern):
     # input a monophonic pattern as a list of 0s and 1s (1s indicating an onset)
     # and obtain its awareness-weighted syncopation value
     # awareness is reported in [2]
     synclist = [0] * 16
     salience = [5, 1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1]
     awareness = [5, 1, 4, 2]
-    n_steps = len(patt)
+    n_steps = len(pattern)
     for ix in range(n_steps):
         next_ix = (ix + 1) % n_steps
         # look for an onset and a silence following
-        if patt[ix] == 1 and patt[next_ix] == 0:
+        if pattern[ix] == 1 and pattern[next_ix] == 0:
             # compute syncopation
             synclist[ix] = salience[next_ix] - salience[ix]
 
@@ -89,7 +89,7 @@ def syncopation16_awareness(patt):
     return sum(sync_and_awareness)
 
 
-def evenness(patt):
+def evenness(pattern):
     # how well distributed are the D onsets of a pattern
     # if they are compared to a perfect D sided polygon
     # input patterns are phase-corrected to start always at step 0
@@ -97,36 +97,36 @@ def evenness(patt):
     # o1, o2, o3, o4 to positions 0 4 8 and 12
     # here we will use a simple algorithm that does not involve DFT computation
     # evenness is well described in [Milne and Dean, 2016] but this implementation is much simpler
-    d = density(patt)
+    d = density(pattern)
     if d == 0:
         return 0
 
     iso_angle_16 = 2 * math.pi / 16
-    first_onset_step = [i for i, x in enumerate(patt) if x == 1][0]
+    first_onset_step = [i for i, x in enumerate(pattern) if x == 1][0]
     first_onset_angle = first_onset_step * iso_angle_16
     iso_angle = 2 * math.pi / d
-    iso_patt_radians = [x * iso_angle for x in range(d)]
-    patt_radians = [i * iso_angle_16 for i, x in enumerate(patt) if x == 1]
+    iso_pattern_radians = [x * iso_angle for x in range(d)]
+    pattern_radians = [i * iso_angle_16 for i, x in enumerate(pattern) if x == 1]
     cosines = [
-        abs(math.cos(x - patt_radians[i] + first_onset_angle))
-        for i, x in enumerate(iso_patt_radians)
+        abs(math.cos(x - pattern_radians[i] + first_onset_angle))
+        for i, x in enumerate(iso_pattern_radians)
     ]
     return sum(cosines) / d
 
 
-def balance(patt):
+def balance(pattern):
     # balance is described in [Milne and Herff, 2020] as:
     # "a quantification of the proximity of that rhythm's
     # “centre of mass” (the mean position of the points)
     # to the centre of the unit circle."
-    d = density(patt)
+    d = density(pattern)
     if d == 0:
         return 1
 
     center = np.array([0, 0])
     iso_angle_16 = 2 * math.pi / 16
-    X = [math.cos(i * iso_angle_16) for i, x in enumerate(patt) if x == 1]
-    Y = [math.sin(i * iso_angle_16) for i, x in enumerate(patt) if x == 1]
+    X = [math.cos(i * iso_angle_16) for i, x in enumerate(pattern) if x == 1]
+    Y = [math.sin(i * iso_angle_16) for i, x in enumerate(pattern) if x == 1]
     matrix = np.array([X, Y])
     matrix_sum = matrix.sum(axis=1)
     magnitude = np.linalg.norm(matrix_sum - center) / d
