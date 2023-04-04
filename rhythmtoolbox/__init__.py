@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import ndimage
 
-from .descriptors import (
+from rhythmtoolbox.descriptors import (
     bandness,
     density,
     get_n_onset_steps,
@@ -16,8 +16,7 @@ from .descriptors import (
     syncopation16,
     syness,
 )
-from .midi_mapping import get_bands
-
+from rhythmtoolbox.midi_mapping import get_bands
 
 DESCRIPTOR_NAMES = [
     "noi",
