@@ -97,6 +97,7 @@ The following descriptors are valid only for 16-step patterns:
 | lowSync      | Syncopation of the low freq band            |                                                                          |
 | midSync      | Syncopation of the mid freq band            |                                                                          |
 | hiSync       | Syncopation of the high freq band           |                                                                          |
+| syness       | Syncopation / density                       |                                                                          |
 | lowSyness    | Syncopation / density of the low freq band  |                                                                          |
 | midSyness    | Syncopation / density of the mid freq band  |                                                                          |
 | hiSyness     | Syncopation / density of the high freq band |                                                                          |
