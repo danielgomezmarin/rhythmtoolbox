@@ -138,7 +138,7 @@ def balance(pattern):
 
 def noi(roll):
     """Returns the number of instruments (noi) used in the roll"""
-    return len(list(filter(lambda x: x.sum() > 0, roll.T)))
+    return (roll.sum(axis=0) > 0).sum()
 
 
 def density(pattern):
