@@ -12,7 +12,7 @@ setup(
             "tests*",
         ]
     ),
-    install_requires=["numpy==1.23.3", "pypianoroll~=1.0.4"],
+    install_requires=["numpy~=1.24.2", "pretty_midi~=0.2.10", "scipy~=1.10.1"],
     extras_require={
         "test": test_requires,
     },

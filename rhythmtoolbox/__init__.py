@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import ndimage
+import pretty_midi as pm
 
 from rhythmtoolbox.descriptors import (
     bandness,
@@ -58,8 +59,7 @@ def resample_pianoroll(roll, from_resolution, to_resolution):
     if from_resolution == to_resolution:
         return roll
 
-    # Piano roll must be a 2D array
-    assert len(roll.shape) == 2
+    assert len(roll.shape) == 2, "Piano roll must be a 2D array"
 
     factor = to_resolution / from_resolution
 
@@ -87,10 +87,9 @@ def pianoroll2descriptors(roll, resolution=4, drums=True):
          Descriptors in a dict of {descriptor_name: descriptor_value}
     """
 
-    # Piano roll must be a 2D array
-    assert len(roll.shape) == 2
+    assert len(roll.shape) == 2, "Piano roll must be a 2D array"
 
-    # Initialize the return dict
+    # Initialize the output dictionary
     result = {d: None for d in DESCRIPTOR_NAMES}
 
     # Resample to a 16-note resolution
@@ -111,7 +110,7 @@ def pianoroll2descriptors(roll, resolution=4, drums=True):
         if len(resampled) == 16:
             result["balance"] = balance(pattern)
             result["evenness"] = evenness(pattern)
-            result["sync"] = syncopation16(resampled)
+            result["sync"] = syncopation16(pattern)
             result["syness"] = syness(pattern)
 
         for desc in DESCRIPTOR_NAMES:
@@ -176,11 +175,76 @@ def pattlist2descriptors(pattlist, resolution=4, drums=True):
     return pianoroll2descriptors(roll, resolution, drums=drums)
 
 
-def midifile2descriptors(midi_filepath, drums=True):
+def get_subdivisions(pmid, resolution):
+    """Parse beats from a PrettyMIDI object and create an array of subdivisions at a given resolution.
+
+    :param pmid: PrettyMIDI object
+    :param resolution: Resolution of the output array
+    :return: Array of subdivisions
+    """
+    beats = pmid.get_beats()
+
+    # Assume a single 4-beat bar
+    if len(beats) <= 1:
+        beats = np.arange(0, 4)
+
+    additional_beat = 2 * beats[-1] - beats[-2]
+    beats = np.append(beats, additional_beat)
+
+    # Upsample beat times to the input resolution using linear interpolation
+    subdivisions = []
+    for start, end in zip(beats, beats[1:]):
+        for j in range(resolution):
+            subdivisions.append((end - start) / resolution * j + start)
+    subdivisions.append(beats[-1])
+
+    return np.array(subdivisions)
+
+
+def get_onset_roll_from_pmid(pmid, resolution=4):
+    """Converts a PrettyMIDI object to a piano roll at the given resolution, preserving only onsets.
+
+    - If input MIDI is multi-track, we consider only the first track
+    - The input MIDI is quantized to the given resolution
+
+    :param pmid: PrettyMIDI object
+    :param resolution: Resolution of the piano roll in MIDI ticks per beat
+    :return: Onset roll of shape (N, V), where N is the number of time steps and V is the number of MIDI pitches
+    """
+    if not pmid.instruments:
+        return np.zeros((0, 128), np.uint8)
+
+    # Consider only the first instrument
+    instrument = pmid.instruments[0]
+    if len(instrument.notes) == 0:
+        return np.zeros((0, 128), np.uint8)
+
+    subdivisions = get_subdivisions(pmid, resolution=resolution)
+
+    n_ticks = len(subdivisions) - 1
+
+    onsets_unquantized = [note.start for note in instrument.notes]
+    onsets = [np.argmin(np.abs(t - subdivisions)) for t in onsets_unquantized]
+
+    # If an onset is quantized to the last tick, move it to the previous tick
+    for ix, onset in enumerate(onsets):
+        if onset == n_ticks:
+            onsets[onsets.index(onset)] = onset - 1
+
+    pitches = [note.pitch for note in instrument.notes]
+    velocities = [note.velocity for note in instrument.notes]
+
+    onset_roll = np.zeros((n_ticks, 128), np.uint8)
+    onset_roll[onsets, pitches] = velocities
+
+    return onset_roll
+
+
+def midifile2descriptors(filepath, drums=True):
     """Compute all descriptors from a MIDI file.
 
     Parameters
-        midi_filepath, str
+        filepath, str
         Path to a MIDI file
 
         drums, bool
@@ -189,7 +253,6 @@ def midifile2descriptors(midi_filepath, drums=True):
     Returns
          Descriptors in a dict of {descriptor_name: descriptor_value}
     """
-    import pypianoroll
-
-    multitrack = pypianoroll.read(midi_filepath, resolution=4)
-    return pianoroll2descriptors(multitrack[0].pianoroll, drums=drums)
+    pmid = pm.PrettyMIDI(filepath, resolution=4)
+    onset_roll = get_onset_roll_from_pmid(pmid)
+    return pianoroll2descriptors(onset_roll, drums=drums)
