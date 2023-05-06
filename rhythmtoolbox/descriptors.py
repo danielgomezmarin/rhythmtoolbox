@@ -35,7 +35,6 @@ import math
 
 import numpy as np
 
-
 # Monophonic descriptors
 
 
@@ -133,17 +132,17 @@ def balance(pattern):
     return 1 - magnitude
 
 
+def density(pattern):
+    """Computes the density of the pattern."""
+    return sum(pattern)
+
+
 # Polyphonic descriptors
 
 
 def noi(roll):
     """Returns the number of instruments (noi) used in the roll"""
     return (roll.sum(axis=0) > 0).sum()
-
-
-def density(pattern):
-    """Computes the density of the pattern."""
-    return sum(pattern)
 
 
 def get_n_onset_steps(roll):

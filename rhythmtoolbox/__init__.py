@@ -1,14 +1,14 @@
 import numpy as np
-from scipy import ndimage
 import pretty_midi as pm
+from scipy import ndimage
 
 from rhythmtoolbox.descriptors import (
+    balance,
     bandness,
     density,
+    evenness,
     get_n_onset_steps,
     noi,
-    balance,
-    evenness,
     poly_balance,
     poly_density,
     poly_evenness,
@@ -46,10 +46,10 @@ DESCRIPTOR_NAMES = [
 
 
 def pattlist_to_pianoroll(pattlist):
-    """Convert from a pattern list representation to a piano roll representation"""
+    """Convert a pattern list to a piano roll"""
     roll = np.zeros((len(pattlist), 128))
     for i in range(len(roll)):
-        roll[i][pattlist[i]] = 1
+        roll[i, pattlist[i]] = 1
     return roll
 
 
