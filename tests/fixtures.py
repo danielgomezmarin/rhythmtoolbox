@@ -141,3 +141,56 @@ BOSKA_9_DESCRIPTORS = {
     "polyEvenness": 4.930845709389592,
     "polySync": 3,
 }
+
+# TODO: store file descriptors in files
+# midi/two_bar/four_kicks.mid
+FOUR_KICKS_DESCRIPTORS = {
+    "noi": 1,
+    "polyDensity": 4,
+    "lowDensity": 4,
+    "midDensity": 0,
+    "hiDensity": 0,
+    "lowness": 1.0,
+    "midness": 0.0,
+    "hiness": 0.0,
+    "stepDensity": 0.125,
+    "sync": -7.0,
+    "lowSync": -7.0,
+    "midSync": 0.0,
+    "hiSync": 0.0,
+    "syness": -3.5,
+    "lowSyness": -3.5,
+    "midSyness": 0.0,
+    "hiSyness": 0.0,
+    "balance": 1,
+    "polyBalance": 1,
+    "evenness": 1.0,
+    "polyEvenness": 3.0,
+    "polySync": 0.0,
+}
+
+# midi/two_bar/unbalanced_1.mid
+UNBALANCED_1_DESCRIPTORS = {
+    "noi": 2,
+    "polyDensity": 7,
+    "lowDensity": 3,
+    "midDensity": 4,
+    "hiDensity": 0,
+    "lowness": 0.42857142857142855,
+    "midness": 0.5714285714285714,
+    "hiness": 0.0,
+    "stepDensity": 0.21875,
+    "sync": -3.0,
+    "lowSync": -3.0,
+    "midSync": -1.0,
+    "hiSync": 0.0,
+    "syness": -0.5416666666666666,
+    "lowSyness": -1.25,
+    "midSyness": -0.5,
+    "hiSyness": 0.0,
+    "balance": 0.5581811742566036,
+    "polyBalance": 0.5503215251637058,
+    "evenness": 0.8536618422656435,
+    "polyEvenness": 4.691341716182545,
+    "polySync": 0.0,
+}

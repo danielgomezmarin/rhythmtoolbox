@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import numpy as np
 import pretty_midi as pm
 from scipy import ndimage
@@ -107,11 +109,17 @@ def pianoroll2descriptors(roll, resolution=4, drums=True):
         result["stepDensity"] = step_density(resampled)
         result["polyDensity"] = density(pattern)
 
-        if len(resampled) == 16:
-            result["balance"] = balance(pattern)
-            result["evenness"] = evenness(pattern)
-            result["sync"] = syncopation16(pattern)
-            result["syness"] = syness(pattern)
+        if len(resampled) % 16 == 0:
+            sub_descs = defaultdict(list)
+            for subroll in np.split(resampled, len(resampled) / 16):
+                subpattern = (subroll.sum(axis=1) > 0).astype(int)
+                sub_descs["balance"] = balance(subpattern)
+                sub_descs["evenness"] = evenness(subpattern)
+                sub_descs["sync"] = syncopation16(subpattern)
+                sub_descs["syness"] = syness(subpattern)
+
+            for desc in sub_descs:
+                result[desc] = np.mean(sub_descs[desc])
 
         for desc in DESCRIPTOR_NAMES:
             if desc not in result:
@@ -134,20 +142,29 @@ def pianoroll2descriptors(roll, resolution=4, drums=True):
     result["hiness"] = bandness(hi_band, n_onset_steps)
 
     # Compute descriptors that are valid only for 16-step patterns
-    if len(resampled) == 16:
-        result["sync"] = syncopation16(pattern)
-        result["lowSync"] = syncopation16(low_band)
-        result["midSync"] = syncopation16(mid_band)
-        result["hiSync"] = syncopation16(hi_band)
-        result["syness"] = syness(pattern)
-        result["lowSyness"] = syness(low_band)
-        result["midSyness"] = syness(mid_band)
-        result["hiSyness"] = syness(hi_band)
-        result["balance"] = balance(pattern)
-        result["polyBalance"] = poly_balance(low_band, mid_band, hi_band)
-        result["evenness"] = evenness(pattern)
-        result["polyEvenness"] = poly_evenness(low_band, mid_band, hi_band)
-        result["polySync"] = poly_sync(low_band, mid_band, hi_band)
+    # For patterns w lengths greater than and divisible by 16, compute descriptors for each 16-step subpattern and return the mean
+    if len(resampled) % 16 == 0:
+        sub_descs = defaultdict(list)
+        for subroll in np.split(resampled, len(resampled) / 16):
+            sub_low, sub_mid, sub_hi = get_bands(subroll)
+            subpattern = (subroll.sum(axis=1) > 0).astype(int)
+
+            sub_descs["sync"].append(syncopation16(subpattern))
+            sub_descs["lowSync"].append(syncopation16(sub_low))
+            sub_descs["midSync"].append(syncopation16(sub_mid))
+            sub_descs["hiSync"].append(syncopation16(sub_hi))
+            sub_descs["syness"].append(syness(subpattern))
+            sub_descs["lowSyness"].append(syness(sub_low))
+            sub_descs["midSyness"].append(syness(sub_mid))
+            sub_descs["hiSyness"].append(syness(sub_hi))
+            sub_descs["balance"].append(balance(subpattern))
+            sub_descs["polyBalance"].append(poly_balance(sub_low, sub_mid, sub_hi))
+            sub_descs["evenness"].append(evenness(subpattern))
+            sub_descs["polyEvenness"].append(poly_evenness(sub_low, sub_mid, sub_hi))
+            sub_descs["polySync"].append(poly_sync(sub_low, sub_mid, sub_hi))
+
+        for desc in sub_descs:
+            result[desc] = np.mean(sub_descs[desc])
 
     return result
 
@@ -188,8 +205,12 @@ def get_subdivisions(pmid, resolution):
     if len(beats) <= 1:
         beats = np.arange(0, 4)
 
-    additional_beat = 2 * beats[-1] - beats[-2]
-    beats = np.append(beats, additional_beat)
+    beat_sep = beats[-1] - beats[-2]
+    additional_beat = beats[-1] + beat_sep
+    additional_beats = np.array(additional_beat)
+    if additional_beat % 1 != 0:
+        additional_beats = np.append(additional_beats, additional_beat + beat_sep)
+    beats = np.append(beats, additional_beats)
 
     # Upsample beat times to the input resolution using linear interpolation
     subdivisions = []
