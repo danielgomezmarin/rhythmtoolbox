@@ -1,12 +1,30 @@
-from fixtures import (BOSKA_3, BOSKA_3_DESCRIPTORS, BOSKA_8,
-                      BOSKA_8_DESCRIPTORS, BOSKA_9, BOSKA_9_DESCRIPTORS,
-                      PATT_1, PATT_2)
+from .fixtures import (
+    BOSKA_3,
+    BOSKA_3_DESCRIPTORS,
+    BOSKA_8,
+    BOSKA_8_DESCRIPTORS,
+    BOSKA_9,
+    BOSKA_9_DESCRIPTORS,
+    PATT_1,
+    PATT_2,
+)
 
-from rhythmtoolbox.descriptors import (balance, bandness, density, evenness,
-                                       get_n_onset_steps, noi, poly_balance,
-                                       poly_density, poly_evenness, poly_sync,
-                                       step_density, syncopation16,
-                                       syncopation16_awareness, syness)
+from rhythmtoolbox.descriptors import (
+    balance,
+    bandness,
+    density,
+    evenness,
+    get_n_onset_steps,
+    noi,
+    poly_balance,
+    poly_density,
+    poly_evenness,
+    poly_sync,
+    step_density,
+    syncopation16,
+    syncopation16_awareness,
+    syness,
+)
 from rhythmtoolbox.midi_mapping import get_bands
 
 

@@ -1,5 +1,5 @@
 import numpy as np
-from fixtures import (
+from .fixtures import (
     BOSKA_3,
     BOSKA_3_DESCRIPTORS,
     BOSKA_3_PATTLIST,
@@ -9,6 +9,8 @@ from fixtures import (
     BOSKA_9,
     BOSKA_9_DESCRIPTORS,
     BOSKA_9_PATTLIST,
+    FOUR_KICKS_DESCRIPTORS,
+    UNBALANCED_1_DESCRIPTORS,
 )
 
 from rhythmtoolbox import (
@@ -19,10 +21,16 @@ from rhythmtoolbox import (
 
 
 def test_midifile2descriptors():
-    v = midifile2descriptors("midi/boska/3.mid")
-    assert set(v) == set(BOSKA_3_DESCRIPTORS)
-    for k in v:
-        assert np.isclose(v[k], BOSKA_3_DESCRIPTORS[k])
+    file_descriptors = {
+        "midi/boska/3.mid": BOSKA_3_DESCRIPTORS,
+        "midi/two_bar/four_kicks.mid": FOUR_KICKS_DESCRIPTORS,
+        "midi/two_bar/unbalanced_1.mid": UNBALANCED_1_DESCRIPTORS,
+    }
+    for f in file_descriptors:
+        v = midifile2descriptors(f)
+        assert set(v) == set(file_descriptors[f])
+        for k in v:
+            assert np.isclose(v[k], file_descriptors[f][k])
 
     v = midifile2descriptors("midi/boska/8.mid")
     assert np.isclose(v["noi"], 5)

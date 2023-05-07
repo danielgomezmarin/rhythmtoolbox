@@ -1,7 +1,6 @@
-from fixtures import BOSKA_3, BOSKA_8, BOSKA_9
+from .fixtures import BOSKA_3, BOSKA_8, BOSKA_9
 
-from rhythmtoolbox.midi_mapping import (event_to_3number, event_to_8number,
-                                        get_band)
+from rhythmtoolbox.midi_mapping import event_to_3number, event_to_8number, get_band
 
 
 def test_get_band():
